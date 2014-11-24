@@ -1,0 +1,26 @@
+﻿## Interface: 50400
+## X-Min-Interface: 50001
+## Title:|cffffe00a<|r|cffff7d0aDBM|r|cffffe00a>|r |cff69ccf0Heart of Fear|r
+## Author: MysticalOS
+## RequiredDeps: DBM-Core
+## SavedVariablesPerCharacter: DBMHeartofFear_SavedVars, DBMHeartofFear_SavedStats
+## X-DBM-Mod: 1
+## X-DBM-Mod-Type: RAID
+## X-DBM-Mod-Category: MOP
+## X-DBM-Mod-Has-LFR : 1
+## X-DBM-Mod-Name: Heart of Fear
+## X-DBM-Mod-Sort: 4
+## X-DBM-Mod-MapID: 1009
+## LoadOnDemand: 1
+## Dependencies: DBM-Core
+
+localization.en.lua
+localization.tw.lua
+localization.cn.lua
+Zorlok.lua
+Tayak.lua
+Garalon.lua
+Meljarak.lua
+Unsok.lua
+Shekzeer.lua
+HoFTrash.lua

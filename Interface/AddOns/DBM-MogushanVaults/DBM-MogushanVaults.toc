@@ -1,0 +1,25 @@
+﻿## Interface: 50400
+## X-Min-Interface: 50001
+## Title:|cffffe00a<|r|cffff7d0aDBM|r|cffffe00a>|r |cff69ccf0Mogu'shan Vaults|r
+## Author: MysticalOS
+## RequiredDeps: DBM-Core
+## SavedVariablesPerCharacter: DBMMogushanVaults_SavedVars, DBMMogushanVaults_SavedStats
+## X-DBM-Mod: 1
+## X-DBM-Mod-Type: RAID
+## X-DBM-Mod-Category: MOP
+## X-DBM-Mod-Has-LFR : 1
+## X-DBM-Mod-Name: Mogu'shan Vaults
+## X-DBM-Mod-Sort: 5
+## X-DBM-Mod-MapID: 1008
+## LoadOnDemand: 1
+## Dependencies: DBM-Core
+
+localization.en.lua
+localization.tw.lua
+localization.cn.lua
+StoneGuard.lua
+Feng.lua
+GarajalTheSpiritbinder.lua
+SpiritKings.lua
+Elegon.lua
+WillofEmperor.lua
