@@ -160,7 +160,7 @@ function Garrison:GetOptions()
 			general = {
 				order = 100,
 				type = "group",
-				name = "General",
+				name = L["General"],
 				cmdHidden = true,
 				args = {				
 					garrisonMinimapButton = {
@@ -174,8 +174,31 @@ function Garrison:GetOptions()
 							Garrison:UpdateConfig()
 						end,
 					},	
+					highAccuracy = {
+						order = 110,
+						type = "toggle",
+						width = "double",
+						name = L["High Accuracy"],
+						desc = L["Update LDB/Tooltip every second"],
+						get = function() return configDb.general.highAccuracy end,
+						set = function(_,v) configDb.general.highAccuracy = v
+							Garrison:UpdateLDB()
+						end,
+					},
+					showSeconds = {
+						order = 110,
+						type = "toggle",
+						width = "double",
+						name = L["Show seconds in LDB/Tooltip"],
+						desc = L["Show seconds in LDB/Tooltip"],
+						get = function() return configDb.general.showSeconds end,
+						set = function(_,v) configDb.general.showSeconds = v
+							Garrison:UpdateLDB()
+						end,
+						--disabled = function() return not configDb.general.highAccuracy end,
+					},					
 					missionGroup = {
-						order = 100,
+						order = 200,
 						type = "group",
 						name = L["Mission"],
 						cmdHidden = true,
@@ -318,17 +341,55 @@ function Garrison:GetOptions()
 			dataGroup = {
 				order = 200,
 				type = "group",
-				name = "Data",
+				name = L["Data"],
 				cmdHidden = true,
 				args = {
 				},
 			},
-			notificationGroup = {
+			notificationGroup = {			
 				order = 300,
 				type = "group",
 				name = L["Notifications"],
 				cmdHidden = true,
 				args = {
+					notificationGeneral = {
+						order = 10,
+						type = "group",
+						name = L["General"],
+						cmdHidden = true,
+						args = {
+							disableInParty = {
+								order = 100,
+								type = "toggle",
+								width = "full",
+								name = L["Disable Notifications in Dungeon/Scenario"],
+								desc = L["Disable Notifications in Dungeon/Scenario"],
+								get = function() return configDb.notification.general.disableInParty end,
+								set = function(_,v) configDb.notification.general.disableInParty = v
+								end,
+							},
+							disableInRaid = {
+								order = 200,
+								type = "toggle",
+								width = "full",
+								name = L["Disable Notifications in Raid"],
+								desc = L["Disable Notifications in Raid"],
+								get = function() return configDb.notification.general.disableInRaid end,
+								set = function(_,v) configDb.notification.general.disableInRaid = v
+								end,
+							},
+							disableInPvP = {
+								order = 300,
+								type = "toggle",
+								width = "full",
+								name = L["Disable Notifications in PvP"],
+								desc = L["Disable Notifications in Battleground/arena"],
+								get = function() return configDb.notification.general.disableInPvP end,
+								set = function(_,v) configDb.notification.general.disableInPvP = v
+								end,
+							},
+						},
+					},
 					notificationMissionGroup = {
 						order = 100,
 						type = "group",
@@ -399,6 +460,17 @@ function Garrison:GetOptions()
 														or not configDb.notification.mission.repeatOnLoad
 														 end,
 							},
+							compactToast = {
+								order = 340,
+								type = "toggle",
+								width = "full",
+								name = L["Compact Toast"],
+								desc = L["Compact Toast"],
+								get = function() return configDb.notification.mission.compactToast end,
+								set = function(_,v)
+									configDb.notification.mission.compactToast = v
+								end,
+							},							
 							miscHeader = {
 								order = 400,
 								type = "header",
@@ -526,6 +598,17 @@ function Garrison:GetOptions()
 														or not configDb.notification.building.repeatOnLoad
 														 end,
 							},
+							compactToast = {
+								order = 340,
+								type = "toggle",
+								width = "full",
+								name = L["Compact Toast"],
+								desc = L["Compact Toast"],
+								get = function() return configDb.notification.building.compactToast end,
+								set = function(_,v)
+									configDb.notification.building.compactToast = v
+								end,
+							},							
 							miscHeader = {
 								order = 400,
 								type = "header",
@@ -654,6 +737,17 @@ function Garrison:GetOptions()
 														or not configDb.notification.shipment.repeatOnLoad
 														 end,
 							},
+							compactToast = {
+								order = 340,
+								type = "toggle",
+								width = "full",
+								name = L["Compact Toast"],
+								desc = L["Compact Toast"],
+								get = function() return configDb.notification.shipment.compactToast end,
+								set = function(_,v)
+									configDb.notification.shipment.compactToast = v
+								end,
+							},
 							miscHeader = {
 								order = 400,
 								type = "header",
@@ -693,7 +787,7 @@ function Garrison:GetOptions()
 								set = function(_,v)
 									configDb.notification.shipment.playSound = v
 								end,
-								disabled = function() return not configDb.notification.shipment.enabled end,								
+								disabled = function() return not configDb.notification.shipment.enabled end,
 							},
 							playSoundOnMissionCompleteName = {
 								order = 440,
@@ -770,7 +864,7 @@ function Garrison:GetOptions()
 					fontSize = {
 						order = 140,
 						type = "range",
-						min = 9,
+						min = 5,
 						max = 20,
 						step = 1,
 						width = "full",
@@ -784,11 +878,26 @@ function Garrison:GetOptions()
 					showIcon = {
 						order = 150,
 						type = "toggle",
+						width = "full",
 						name = L["Show Icons"],
 						desc = L["Show Icons"],
 						get = function() return configDb.display.showIcon end,
 						set = function(_,v)
 							configDb.display.showIcon = v
+						end,
+					},
+					backgroundColor = {
+						order = 160,
+						type = "range",
+						width = "full",
+						step = 1,
+						min = 0,
+						max = 255,
+						name = L["Background Alpha"],
+						desc = L["Background Alpha"],
+						get = function() return math.floor(configDb.display.backgroundAlpha * 255) end,
+						set = function(_,v)
+							configDb.display.backgroundAlpha = (v / 255)
 						end,
 					},					
 				},
@@ -843,6 +952,28 @@ function Garrison:GetOptions()
 								set = function(_,v) configDb.general.mission.collapseOtherCharsOnLogin = v
 									Garrison:Update()
 								end,						
+							},
+							compactTooltip = {
+								order = 80,
+								type = "toggle",
+								width = "full",
+								name = L["Compact Tooltip"],
+								desc = L["Don't show empty newlines in tooltip"],
+								get = function() return configDb.general.mission.compactTooltip end,
+								set = function(_,v)
+									configDb.general.mission.compactTooltip = v
+								end,
+							},
+							showFollowers = {
+								order = 90,
+								type = "toggle",
+								width = "full",
+								name = L["Show followers for each mission"],
+								desc = L["Show followers for each mission"],
+								get = function() return configDb.general.mission.showFollowers end,
+								set = function(_,v)
+									configDb.general.mission.showFollowers = v
+								end,								
 							},							
 							groupHeader = {
 								order = 100,
@@ -941,8 +1072,19 @@ function Garrison:GetOptions()
 								get = function() return configDb.general.building.collapseOtherCharsOnLogin end,
 								set = function(_,v) configDb.general.building.collapseOtherCharsOnLogin = v
 									Garrison:Update()
-								end,						
-							},								
+								end,
+							},
+							compactTooltip = {
+								order = 80,
+								type = "toggle",
+								width = "full",
+								name = L["Compact Tooltip"],
+								desc = L["Don't show empty newlines in tooltip"],
+								get = function() return configDb.general.building.compactTooltip end,
+								set = function(_,v)
+									configDb.general.building.compactTooltip = v
+								end,
+							},							
 							groupHeader = {
 								order = 100,
 								type = "header",
@@ -991,7 +1133,7 @@ function Garrison:GetOptions()
 			aboutGroup = {
 				order = 900,
 				type = "group",
-				name = "About",
+				name = L["About"],
 				cmdHidden = true,
 				args = {
 					aboutHeader = {

@@ -114,6 +114,26 @@ function Garrison:GARRISON_MISSION_NPC_OPENED(...)
 	Garrison:UpdateUnknownMissions(true)
 end
 
+function Garrison:IsNearCache()
+	SetMapToCurrentZone()
+	local posX, posY = GetPlayerMapPosition("player");
+	local instanceMapID = _G.select(8, _G.GetInstanceInfo())
+
+	if Garrison.instanceId[instanceMapID] then	
+		local garrisonInfo = Garrison.instanceId[instanceMapID]
+		local distX = math.abs(garrisonInfo.x - posX)
+		local distY = math.abs(garrisonInfo.y - posY)
+
+		local nearCache = (distX < 0.015 and distY < 0.015)
+
+		debugPrint(("X %s Y %s => %s"):format(tostring(distX), tostring(distY), tostring(nearCache)))
+
+		return true
+	end
+
+	return false
+end
+
 function Garrison:IsInGarrison()
 	local mapName = _G.GetRealZoneText()
 
@@ -127,6 +147,37 @@ function Garrison:IsInGarrison()
 		return true
 	end
 
+	return false
+end
+
+function Garrison:DisableInInstance()
+	local inInstance, instanceType = _G.IsInInstance()
+
+	if inInstance then
+		if configDb.notification.general.disableInParty and 
+			(  instanceType == 'scenario'
+			or instanceType == 'party'			
+			) then
+			debugPrint(("InInstance (%s) - No Notifications"):format(instanceType))
+			return true
+		end
+
+		if configDb.notification.general.disableInRaid and 
+			(  instanceType == 'raid'
+			) then
+			debugPrint(("InInstance (%s) - No Notifications"):format(instanceType))
+			return true
+		end
+
+		if configDb.notification.general.disableInPvP and 
+			(  instanceType == 'scenario'
+			or instanceType == 'party'			
+			) then
+			debugPrint(("InInstance (%s) - No Notifications"):format(instanceType))
+			return true
+		end
+	end
+	
 	return false
 end
 
@@ -238,7 +289,7 @@ function Garrison:UpdateShipment(buildingID, shipmentData)
 				tmpShipment.notificationDismissed = shipmentData.notificationDismissed or false
 				tmpShipment.notification = shipmentData.notification
 
-				if tmpShipment.notificationValue then
+				if tmpShipment.name and tmpShipment.notificationValue then
 					debugPrint(("Update Shipment (%s) - NotificationValue=%s"):format(tmpShipment.name, tmpShipment.notificationValue))
 				end
 			end
@@ -394,10 +445,111 @@ end
 
 
 function Garrison:VignetteEvent(event, ...)
-	if event == "VIGNETTE_REMOVED" then
-		local arg = ...
-		debugPrint(("VignetteRemoved: %s"):format(arg))
+	if Garrison.location.inGarrison then
+		if event == "VIGNETTE_ADDED" then
+			local vignetteInstanceId, arg2 = ...
+			local ofsX, ofsY, name, objectIcon = C_Vignettes.GetVignetteInfoFromInstanceID(vignetteInstanceId)
+			debugPrint(("VignetteAdded: %s %s %s %s %s"):format(vignetteInstanceId, tostring(ofsX), tostring(ofsX), name, objectIcon))
+		end
+		if event == "VIGNETTE_REMOVED" then
+			local arg = ...
+			debugPrint(("VignetteRemoved: %s"):format(arg))
+		end
 	end
+end
+
+function Garrison:LootToastEvent(event, ...)
+	local typeIdentifier, itemLink, quantity = ...
+	if Garrison:IsNearCache() then
+		debugPrint(("Looted %s (amount: %s) of %s"):format(tostring(typeIdentifier), tostring(quantity), tostring(itemLink)))
+		if typeIdentifier == "currency" and itemLink then
+			local currencyType = string.match(itemLink, "currency:([%-?%d:]+)")
+
+			if currencyType ~= nil and currencyType == tostring(Garrison.GARRISON_CURRENCY) then
+				globalDb.data[charInfo.realmName][charInfo.playerName].garrisonCacheLastLooted = time()
+			end
+		end
+	end
+end
+
+function Garrison:DailyQuestHandling()
+	for _, realmData in pairs(globalDb.data) do
+		for _, playerData in pairs(realmData) do
+
+			local lootedNextReset = playerData.lootedNextReset
+
+			if not lootedNextReset or _G.time() >= lootedNextReset then
+				playerData.lootedNextReset = Garrison.GetNextDailyResetTime()
+				playerData.lootedToday = {}
+			end
+		end
+	end
+end
+
+function Garrison:ChatLootEvent(event, ...) 
+	local message = ...
+
+	if Garrison:IsInGarrison() then
+
+		debugPrint("Loot: IsInGarrison")
+
+		for _, lootData in pairs(Garrison.LOOT_PATTERN) do		
+
+			if not lootData.pattern then
+				lootData.pattern, lootData.captureIndices = Garrison.patternFromFormat(lootData.format)
+				debugPrint(("Pattern compile (%s): %s"):format(lootData.format, lootData.pattern))
+			end
+			
+			local _, _, lootedItemLink, lootedAmount = Garrison.superFind(message, lootData.pattern, lootData.captureIndices)
+			 
+			if lootedItemLink ~= nil then
+				local itemId = Garrison.itemIdFromLink(lootedItemLink)
+
+				if lootedAmount == nil then 
+					lootedAmount = 1
+				end
+
+				if itemId then
+					if not globalDb.data[charInfo.realmName][charInfo.playerName].lootedToday then 
+						globalDb.data[charInfo.realmName][charInfo.playerName].lootedToday = {}
+					end
+
+					for _, trackedItem in pairs(Garrison.GARRISON_TRACK_LOOT_ITEM) do
+						if trackedItem.itemId == itemId then
+							globalDb.data[charInfo.realmName][charInfo.playerName].lootedToday[itemId] = (globalDb.data[charInfo.realmName][charInfo.playerName].lootedToday[itemId] or 0) + lootedAmount
+							debugPrint(("Looted [%s] (%s) - Total Today: %s"):format(trackedItem.name, lootedAmount, globalDb.data[charInfo.realmName][charInfo.playerName].lootedToday[itemId]))
+						end
+					end			
+				end
+
+				break
+			end
+		end
+	end
+end
+
+function Garrison:GetLootInfoForBuilding(lootedToday, buildingId)
+	local retValue = ""
+
+	if lootedToday then
+		for buildingName, buildingInfo in pairs(Garrison.buildingInfo) do
+			if buildingInfo.level then
+				local buildingLevel = buildingInfo.level[buildingId]
+
+				if buildingLevel and buildingInfo.trackLootItemId ~= nil then
+					local lootedToday = lootedToday[buildingInfo.trackLootItemId] or 0
+					if buildingInfo.minLooted and lootedToday > buildingInfo.minLooted then
+						-- Show checkbox
+						retValue = " "..Garrison.ICON_CHECK
+					else
+						retValue = " "..Garrison.ICON_CHECK_WAITING
+					end
+				end
+			end
+		end
+	end
+
+	return retValue
 end
 
 function Garrison:ShipmentStatusUpdate(event, shipmentStarted)
@@ -423,6 +575,14 @@ function Garrison:UpdateCurrency()
 end
 
 function Garrison:QuickUpdate()
+	Garrison:DailyQuestHandling()
+
+	if not configDb.general.highAccuracy then
+		if configDb.general.showSeconds then
+			Garrison:UpdateLDB()
+		end
+	end
+	
 	if Garrison.location.inGarrison then
 		-- in garrison - full update (quick)
 		Garrison:Update()
@@ -430,10 +590,18 @@ function Garrison:QuickUpdate()
 end
 
 function Garrison:LDBUpdate()
-	Garrison:UpdateLDB()
+	if configDb.general.highAccuracy then
+		Garrison:UpdateLDB()
+	end
 end
 
 function Garrison:SlowUpdate()
+	if not configDb.general.highAccuracy then
+		if not configDb.general.showSeconds then
+			Garrison:UpdateLDB()
+		end
+	end	
+
 	if not Garrison.location.inGarrison then
 		-- not in garrison - full update (slow)
 		Garrison:Update()

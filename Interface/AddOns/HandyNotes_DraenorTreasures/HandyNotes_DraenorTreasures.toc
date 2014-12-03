@@ -1,7 +1,9 @@
 ## Interface: 60000
 ## Title: HandyNotes_DraenorTreasures
-## Version: 1.04
+## Version: 1.06
 ## Notes: Shows location of treasures and rares in Draenor
+## Title-zhTW: |cFF00FF40[地圖]|rHandyNotes_DraenorTreasures
+## Notes-zhTW: 德拉諾稀有與財寶的地圖標記(需要HandyNotes)。
 ## Author: Katjes (Coronet - Dun Morogh(EU))
 ## OptionalDeps: Ace3
 ## RequiredDeps: HandyNotes

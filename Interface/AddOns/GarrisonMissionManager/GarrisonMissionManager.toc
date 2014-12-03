@@ -1,11 +1,11 @@
 ## Interface: 60000
-## X-Curse-Packaged-Version: v6
+## X-Curse-Packaged-Version: v9
 ## X-Curse-Project-Name: Garrison Mission Manager
 ## X-Curse-Project-ID: garrison-mission-manager
 ## X-Curse-Repository-ID: wow/garrison-mission-manager/mainline
 
 ## Title: 要塞任务管理器
-## Version: v6
+## Version: v9
 ## Notes: 帮助你选择最优配置来进行要塞追随者任务
 ## Author: Oleg "Rowaa[SR13]" Volkov
 

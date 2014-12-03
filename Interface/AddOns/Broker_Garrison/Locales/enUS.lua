@@ -27,7 +27,7 @@ L["Dismiss"] = true
 L["Shipments Ready + Time/Char to next shipment (All characters)"] = true
 L["Custom LDB Text"] = true
 L["Enable Notifications"] = true
-L["Garrison: Building complete"] = true
+L["Building complete"] = true
 L["Persistent Toasts"] = true
 L["Missions Complete + Time/Char to next completion (All characters)"] = true
 L["Shipments: In Progress"] = true
@@ -43,7 +43,7 @@ L["In Progress: %s"] = true
 L["Font"] = true
 L["Auto-Hide delay"] = true
 L["Total: %s"] = true
-L["Total: %s | In Progress: %s | Complete: %s"] = true
+L["In Progress: %s | Complete: %s | Total: %s"] = true
 L["Tooltip Scale"] = true
 L["Complete: %s"] = true
 L["Display"] = true
@@ -73,7 +73,7 @@ L["Missions: In Progress"] = true
 L["Delete char"] = true
 L["Shipments Ready + Time to next shipment (All characters)"] = true
 L["Misc"] = true
-L["Garrison: Mission complete"] = true
+L["Mission complete"] = true
 L["Play Sound"] = true
 L["Current Player Missions: Complete"] = true
 L["Building complete (%s): %s"] = true
@@ -85,7 +85,7 @@ L["Hide Garrison Minimap-Button"] = true
 L["Ready: %sr% Next: %snt|-%"] = true
 L["Time until next mission"] = true
 L["Broker Garrison"] = true
-L["Shipments Ready: %sr%"] = true
+L["Shipments Ready: %sr%%cachewarning%"] = true
 L["Missions: Total"] = true
 L["Sound"] = true
 L["Current Player Buildings: Complete"] = true
@@ -142,3 +142,29 @@ L["Don't display characters without missions"] = true
 L["Show only current realm"] = true
 
 L["Collapse all other characters on login"] = true
+
+L["Compact Tooltip"] = true
+L["Don't show empty newlines in tooltip"] = true
+L["Show followers for each mission"] = true
+
+L["Compact Toast"] = true
+
+L["Resource Cache Warning Icon"] = true
+L["Current Player Resource Cache"] = true
+
+L["Background Alpha"] = true
+L["High Accuracy"] = true
+L["Update LDB/Tooltip every second"] = true
+L["Show seconds in LDB/Tooltip"] = true
+
+L["Max Resource Cache"] = true
+L["Character Max Resource Cache"] = true
+
+L["Disable Notifications in Dungeon/Scenario"] = true
+L["Disable Notifications in Raid"] = true
+L["Disable Notifications in PvP"] = true
+L["Disable Notifications in Battleground/arena"] = true
+L["General"] = true
+
+L["Data"] = true
+L["About"] = true

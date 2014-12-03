@@ -16,6 +16,8 @@ local GetAtlasInfo = _G.GetAtlasInfo
 local garrisonDb, globalDb, configDb
 local charInfo = Garrison.charInfo
 
+local dummyTextureFrame
+
 function Garrison.tableSize(T)
 	local count = 0
 	if T then
@@ -143,6 +145,23 @@ do
 	end
 end
 
+function Garrison.GetTextureForID(id, size)
+	if Garrison.iconCache[id] == nil then
+		dummyTextureFrame = _G.CreateFrame("Frame", nil, _G.UIParent)
+
+		local icon = dummyTextureFrame:CreateTexture()
+		icon:SetToFileData(id)
+
+		local texture = icon:GetTexture()
+
+		Garrison.iconCache[id] = Garrison.getIconString(texture, size, false)			
+
+		--debugPrint(id.." => "..texture.." => "..Garrison.iconCache[id])
+	end
+
+	return Garrison.iconCache[id]
+end
+
 function Garrison.GetIconPath(name) 
 	local iconPath = Garrison.ICON_REPLACEMENT[name]
 
@@ -256,7 +275,11 @@ function Garrison.formattedSeconds(seconds)
 	elseif seconds >= SECONDS_PER_DAY then
 		return ("%s%d%s %d:%02d"):format(negative, seconds / SECONDS_PER_DAY, L_DAY_ONELETTER_ABBR, math.fmod(seconds / SECONDS_PER_HOUR, 24), math.fmod(seconds / 60, 60))
 	else
-		return ("%s%d:%02d:%02d"):format(negative, seconds / SECONDS_PER_HOUR, math.fmod(seconds / 60, 60), math.fmod(seconds, 60))
+		if configDb.general.showSeconds then
+			return ("%s%d:%02d:%02d"):format(negative, seconds / SECONDS_PER_HOUR, math.fmod(seconds / 60, 60), math.fmod(seconds, 60))
+		else
+			return ("%s%d:%02d"):format(negative, seconds / SECONDS_PER_HOUR, math.ceil(math.fmod(seconds / 60, 60)))
+		end
 	end
 end
 
@@ -293,6 +316,19 @@ function Garrison.getTableValue(data, ...)
 	end
 	
 	return nil
+end
+
+function Garrison.getResourceFromTimestamp(timestamp, ...)
+	if not timestamp then 
+		return nil
+	end
+
+	local now = ...
+	if not now then
+		now = time()
+	end
+	
+	return math.min(500, math.floor(((now - timestamp) / 60) / 10))
 end
 
 function Garrison.replaceVariables(text, data)
@@ -355,6 +391,90 @@ function Garrison.getSortOptions(paramType, default)
 	end
 
 	return sortArray, groupBy
+end
+
+local function sanitizePattern(pattern)
+	pattern = string.gsub(pattern, "%(", "%%(")
+	pattern = string.gsub(pattern, "%)", "%%)")
+	pattern = string.gsub(pattern, "%%s", "(.+)")
+	pattern = string.gsub(pattern, "%%d", "(%%d+)")
+	pattern = string.gsub(pattern, "%-", "%%-")
+
+	return pattern
+end
+
+function Garrison.itemIdFromLink(itemLink)
+	local found, _, itemString = string.find(itemLink, "|H(.+)|h")
+	if found then
+		local _, itemId = strsplit(":", itemString)
+		return tonumber(itemId)
+	end
+	return nil
+end
+
+function Garrison.GetNextDailyResetTime()
+  local resettime = _G.GetQuestResetTime()
+  if not resettime or resettime <= 0 or resettime > 24*3600+30 then
+    return nil
+  end
+  return _G.time() + resettime
+end
+
+function Garrison.superFind(text, pattern, captureIndices)
+	local results = { text:find(pattern) }
+	if #results == 0 then
+		return
+	end
+
+	local s, e = tremove(results, 1), tremove(results, 1)
+
+	local captures = {}
+	for _, index in ipairs(captureIndices) do
+		tinsert(captures, results[index])
+	end
+
+	return s, e, unpack(captures)
+end
+
+function Garrison.patternFromFormat(format)
+	local pattern = ""
+	local captureIndices = {}
+
+	local start = 1
+	local captureIndex = 0
+	repeat
+		-- find the next group
+		local s, e, group, position = format:find("(%%([%d$]*)[ds])", start)
+		if s then
+			-- add the text between the last group and this group
+			pattern = pattern..sanitizePattern(format:sub(start, s-1))
+			-- update the current capture index, using the position bit in the
+			-- group if it exists, otherwise just increment
+			if #position > 0 then
+				-- chop off the $ and convert to a number
+				captureIndex = tonumber(position:sub(1, #position-1))
+			else
+				captureIndex = captureIndex + 1
+			end
+			-- add the current capture index to our list
+			tinsert(captureIndices, captureIndex)
+			-- remove the position bit from the group, sanitize the remainder
+			-- and add it to the pattern
+			pattern = pattern..sanitizePattern(group:gsub("%d%$", "", 1))
+			-- start searching again from past the end of the group
+			start = e + 1
+		else
+			-- if no more groups can be found, but there's still more text
+			-- remaining in the format string, sanitize the remainder, add it
+			-- to the pattern and finish the loop
+			if start <= #format then
+				pattern = pattern..sanitizePattern(format:sub(start))
+			end
+			break
+		end
+	until start > #format
+
+	return pattern, captureIndices
 end
 
 
