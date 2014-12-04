@@ -1,0 +1,6 @@
+## Author: adug
+## Interface: 60000
+## Title: FollowerExport
+## Version: 1.0.0
+## Notes: 输出随从信息
+Frame.xml

@@ -1,0 +1,95 @@
+<Ui xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.blizzard.com/wow/ui/">
+	<Script file="followerexport.lua" />
+	<Frame name="FollowExportFrame" parent="UIParent" toplevel="true" movable="true" enableMouse="true">
+		<Size>
+			<AbsDimension x="1000" y="600" />
+		</Size>
+		<Anchors>
+			<Anchor point="CENTER">
+				<Offset x="0" y="0" />
+			</Anchor>
+		</Anchors>
+		<Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+			<BackgroundInsets>
+				<AbsInset left="11" right="12" top="12" bottom="11" />
+			</BackgroundInsets>
+			<TileSize>
+				<AbsValue val="32" />
+			</TileSize>
+			<EdgeSize>
+				<AbsValue val="32" />
+			</EdgeSize>
+		</Backdrop>
+		<Frames>
+			<Button name="Button1" inherits="UIPanelButtonTemplate" text="X">
+				<Size>
+					<AbsDimension x="22" y="23" />
+				</Size>
+				<Anchors>
+					<Anchor point="TOPRIGHT">
+						<Offset x="0" y="0" />
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>FollowExportFrame:Hide()</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Frames>
+			<EditBox name="parentEditBox" letters="0" multiline="true">
+				<Size x="950" y="500" />
+				<Anchors>
+					<Anchor point="CENTER">
+					<Offset x="0" y="0" />
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+					<Texture file="Interface\COMMON\ThinBorder-Left.png">
+					<Size y="500" />
+						<Anchors>
+						<Anchor point="LEFT">
+							<Offset x="-10" y="0" />
+						</Anchor>
+						</Anchors>
+					</Texture>
+					<Texture file="Interface\COMMON\ThinBorder-Right.png">
+					<Size y="500" />
+						<Anchors>
+						<Anchor point="RIGHT">
+							<Offset x="-10" y="0" />
+						</Anchor>
+						</Anchors>
+					</Texture>
+					<Texture file="Interface\COMMON\ThinBorder-Top.png">
+					<Size x="920"/>
+						<Anchors>
+						<Anchor point="LEFT">
+							<Offset x="0" y="-260" />
+						</Anchor>
+						</Anchors>
+					</Texture>
+					<Texture file="Interface\COMMON\ThinBorder-Top.png">
+					<Size x="920"/>
+						<Anchors>
+						<Anchor point="LEFT">
+							<Offset x="0" y="240" />
+						</Anchor>
+						</Anchors>
+					</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+					</OnLoad>
+				</Scripts>
+				<FontString inherits="ChatFontNormal" />
+			</EditBox>
+		</Frames>
+		<Scripts>
+			<OnLoad>ExportFrame_OnLoad(self)</OnLoad>
+			<OnMouseUp>self:StopMovingOrSizing()</OnMouseUp>
+			<OnMouseDown>self:StartMoving()</OnMouseDown>
+		</Scripts>
+	</Frame>
+</Ui>

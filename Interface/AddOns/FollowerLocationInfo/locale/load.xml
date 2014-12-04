@@ -1,0 +1,29 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.blizzard.com/wow/ui/
+..\..\FrameXML\UI.xsd">
+
+	<Script file="locale.lua" />
+
+	<!-- interface localizations -->
+	<Script file="locale_enUS.lua" />
+	<Script file="locale_deDE.lua" />
+	<Script file="locale_zhTW.lua" />
+	<Script file="locale_zhCN.lua" />
+
+	<!-- interface independent parts -->
+	<Script file="_classspecs.lua" />
+	<Script file="_factions.lua" />
+	<Script file="_followers.lua" />
+	<!-- <Script file="_npcs.lua" /> for later use -->
+	<Script file="_zones.lua" />
+	<Script file="_npcs_old.lua" />
+
+	<!-- temp -->
+	<!--
+	<Script file="xru_alliance.lua" />
+	<Script file="xru_horde.lua" />
+	<Script file="xcn_Alliance.lua"/>
+	<Script file="xcn_Horde.lua"/>
+	<Script file="xtw_alliance.lua"/>
+	-->
+
+</Ui>
