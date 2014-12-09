@@ -2,12 +2,6 @@
 *.bat
 .DS_Store
 
-/*
-!/Interface/
-!/.gitignore
-!/README.textile
-!/README.md
-
 /Interface/ICONS/
 /Interface/ICONS2/
 
