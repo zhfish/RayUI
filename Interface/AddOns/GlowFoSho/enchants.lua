@@ -1,4 +1,10 @@
 GlowFoSho_enchants = {
+    ["7745"] = {
+        ["enchantID"] = "241",
+        ["classic"] = true,
+        ["name"] = "Minor Impact",
+        ["is2H"] = true,
+    },
     ["7786"] = {
         ["enchantID"] = "249",
         ["classic"] = true,
@@ -6,34 +12,23 @@ GlowFoSho_enchants = {
     },
     ["7788"] = {
         ["enchantID"] = "250",
-        ["glowless"] = true,
         ["classic"] = true,
         ["name"] = "Minor Striking",
     },
     ["7793"] = {
         ["enchantID"] = "723",
-        ["glowless"] = true,
         ["classic"] = true,
         ["name"] = "Lesser Intellect",
         ["is2H"] = true,
     },
-    ["7745"] = {
-        ["enchantID"] = "241",
-        ["glowless"] = true,
-        ["classic"] = true,
-        ["name"] = "Minor Impact",
-        ["is2H"] = true,
-    },
     ["13380"] = {
         ["enchantID"] = "255",
-        ["glowless"] = true,
         ["classic"] = true,
         ["name"] = "Lesser Spirit",
         ["is2H"] = true,
     },
     ["13503"] = {
         ["enchantID"] = "241",
-        ["glowless"] = true,
         ["classic"] = true,
         ["name"] = "Lesser Striking",
     },
@@ -53,12 +48,6 @@ GlowFoSho_enchants = {
         ["classic"] = true,
         ["name"] = "Lesser Elemental Slayer",
     },
-    ["21931"] = {
-        ["enchantID"] = "2443",
-        ["glowless"] = true,
-        ["classic"] = true,
-        ["name"] = "Winter's Might",
-    },
     ["13693"] = {
         ["enchantID"] = "943",
         ["classic"] = true,
@@ -69,6 +58,11 @@ GlowFoSho_enchants = {
         ["classic"] = true,
         ["name"] = "Impact",
         ["is2H"] = true,
+    },
+    ["13898"] = {
+        ["enchantID"] = "803",
+        ["classic"] = true,
+        ["name"] = "Fiery Weapon",
     },
     ["13915"] = {
         ["enchantID"] = "912",
@@ -86,31 +80,10 @@ GlowFoSho_enchants = {
         ["classic"] = true,
         ["name"] = "Greater Striking",
     },
-    ["13898"] = {
-        ["enchantID"] = "803",
-        ["classic"] = true,
-        ["name"] = "Fiery Weapon",
-    },
     ["20029"] = {
         ["enchantID"] = "1894",
         ["classic"] = true,
         ["name"] = "Icy Chill",
-    },
-    ["27837"] = {
-        ["enchantID"] = "2646",
-        ["classic"] = true,
-        ["name"] = "Agility",
-        ["is2H"] = true,
-    },
-    ["23800"] = {
-        ["enchantID"] = "2564",
-        ["classic"] = true,
-        ["name"] = "Agility",
-    },
-    ["23799"] = {
-        ["enchantID"] = "2563",
-        ["classic"] = true,
-        ["name"] = "Strength",
     },
     ["20030"] = {
         ["enchantID"] = "1896",
@@ -118,16 +91,25 @@ GlowFoSho_enchants = {
         ["name"] = "Superior Impact",
         ["is2H"] = true,
     },
+    ["20031"] = {
+        ["enchantID"] = "1897",
+        ["classic"] = true,
+        ["name"] = "Superior Striking",
+    },
+    ["20032"] = {
+        ["enchantID"] = "1898",
+        ["classic"] = true,
+        ["name"] = "Lifestealing",
+    },
     ["20033"] = {
         ["enchantID"] = "1899",
         ["classic"] = true,
         ["name"] = "Unholy Weapon",
     },
-    ["20036"] = {
-        ["enchantID"] = "1904",
+    ["20034"] = {
+        ["enchantID"] = "1900",
         ["classic"] = true,
-        ["name"] = "Major Intellect",
-        ["is2H"] = true,
+        ["name"] = "Crusader",
     },
     ["20035"] = {
         ["enchantID"] = "1903",
@@ -135,52 +117,65 @@ GlowFoSho_enchants = {
         ["name"] = "Major Spirit",
         ["is2H"] = true,
     },
-    ["20034"] = {
-        ["enchantID"] = "1900",
+    ["20036"] = {
+        ["enchantID"] = "1904",
         ["classic"] = true,
-        ["name"] = "Crusader",
+        ["name"] = "Major Intellect",
+        ["is2H"] = true,
     },
-    ["22750"] = {
-        ["enchantID"] = "2505",
+    ["21931"] = {
+        ["enchantID"] = "2443",
         ["classic"] = true,
-        ["name"] = "Healing Power",
-    },
-    ["20032"] = {
-        ["enchantID"] = "1898",
-        ["classic"] = true,
-        ["name"] = "Lifestealing",
-    },
-    ["23804"] = {
-        ["enchantID"] = "2568",
-        ["classic"] = true,
-        ["name"] = "Mighty Intellect",
-    },
-    ["23803"] = {
-        ["enchantID"] = "2567",
-        ["classic"] = true,
-        ["name"] = "Mighty Spirit",
+        ["name"] = "Winter's Might",
     },
     ["22749"] = {
         ["enchantID"] = "2504",
         ["classic"] = true,
         ["name"] = "Spell Power",
     },
-    ["20031"] = {
-        ["enchantID"] = "1897",
+    ["22750"] = {
+        ["enchantID"] = "2505",
         ["classic"] = true,
-        ["name"] = "Superior Striking",
+        ["name"] = "Healing Power",
+    },
+    ["23799"] = {
+        ["enchantID"] = "2563",
+        ["classic"] = true,
+        ["name"] = "Strength",
+    },
+    ["23800"] = {
+        ["enchantID"] = "2564",
+        ["classic"] = true,
+        ["name"] = "Agility",
+    },
+    ["23803"] = {
+        ["enchantID"] = "2567",
+        ["classic"] = true,
+        ["name"] = "Mighty Spirit",
+    },
+    ["23804"] = {
+        ["enchantID"] = "2568",
+        ["classic"] = true,
+        ["name"] = "Mighty Intellect",
+    },
+    ["27837"] = {
+        ["enchantID"] = "2646",
+        ["classic"] = true,
+        ["name"] = "Agility",
+        ["is2H"] = true,
+    },
+
+    ["27967"] = {
+        ["lvl"] = 35,
+        ["enchantID"] = "963",
+        ["burningcrusade"] = true,
+        ["name"] = "Major Striking",
     },
     ["27968"] = {
         ["lvl"] = 35,
         ["enchantID"] = "2666",
         ["burningcrusade"] = true,
         ["name"] = "Major Intellect",
-    },
-    ["27967"] = {
-        ["lvl"] = 35,
-        ["enchantID"] = "963",
-        ["burningcrusade"] = true,
-        ["name"] = "Major Striking",
     },
     ["27971"] = {
         ["lvl"] = 35,
@@ -189,29 +184,17 @@ GlowFoSho_enchants = {
         ["name"] = "Savagery",
         ["is2H"] = true,
     },
-    ["42620"] = {
+    ["27972"] = {
         ["lvl"] = 35,
-        ["enchantID"] = "3222",
+        ["enchantID"] = "2668",
         ["burningcrusade"] = true,
-        ["name"] = "Greater Agility",
-    },
-    ["34010"] = {
-        ["lvl"] = 35,
-        ["enchantID"] = "3846",
-        ["burningcrusade"] = true,
-        ["name"] = "Major Healing",
+        ["name"] = "Potency",
     },
     ["27975"] = {
         ["lvl"] = 35,
         ["enchantID"] = "2669",
         ["burningcrusade"] = true,
         ["name"] = "Major Spellpower",
-    },
-    ["27972"] = {
-        ["lvl"] = 35,
-        ["enchantID"] = "2668",
-        ["burningcrusade"] = true,
-        ["name"] = "Potency",
     },
     ["27977"] = {
         ["lvl"] = 35,
@@ -220,29 +203,11 @@ GlowFoSho_enchants = {
         ["name"] = "Major Agility",
         ["is2H"] = true,
     },
-    ["28004"] = {
+    ["27981"] = {
         ["lvl"] = 35,
-        ["enchantID"] = "2675",
+        ["enchantID"] = "2671",
         ["burningcrusade"] = true,
-        ["name"] = "Battlemaster",
-    },
-    ["28003"] = {
-        ["lvl"] = 35,
-        ["enchantID"] = "2674",
-        ["burningcrusade"] = true,
-        ["name"] = "Spellsurge",
-    },
-    ["42974"] = {
-        ["lvl"] = 60,
-        ["enchantID"] = "3225",
-        ["burningcrusade"] = true,
-        ["name"] = "Executioner",
-    },
-    ["27984"] = {
-        ["lvl"] = 35,
-        ["enchantID"] = "2673",
-        ["burningcrusade"] = true,
-        ["name"] = "Mongoose",
+        ["name"] = "Sunfire",
     },
     ["27982"] = {
         ["lvl"] = 35,
@@ -250,43 +215,43 @@ GlowFoSho_enchants = {
         ["burningcrusade"] = true,
         ["name"] = "Soulfrost",
     },
-    ["27981"] = {
+    ["27984"] = {
         ["lvl"] = 35,
-        ["enchantID"] = "2671",
+        ["enchantID"] = "2673",
         ["burningcrusade"] = true,
-        ["name"] = "Sunfire",
+        ["name"] = "Mongoose",
     },
-    ["46578"] = {
-        ["lvl"] = 60,
-        ["enchantID"] = "3273",
+    ["28003"] = {
+        ["lvl"] = 35,
+        ["enchantID"] = "2674",
         ["burningcrusade"] = true,
-        ["name"] = "Deathfrost",
+        ["name"] = "Spellsurge",
     },
-    ["60621"] = {
+    ["28004"] = {
+        ["lvl"] = 35,
+        ["enchantID"] = "2675",
+        ["burningcrusade"] = true,
+        ["name"] = "Battlemaster",
+    },
+    ["34010"] = {
+        ["lvl"] = 35,
+        ["enchantID"] = "3846",
+        ["burningcrusade"] = true,
+        ["name"] = "Major Healing",
+    },
+    ["42620"] = {
+        ["lvl"] = 35,
+        ["enchantID"] = "3222",
+        ["burningcrusade"] = true,
+        ["name"] = "Greater Agility",
+    },
+    ["42974"] = {
         ["lvl"] = 60,
-        ["enchantID"] = "1606",
-        ["wotlk"] = true,
-        ["name"] = "Greater Potency",
+        ["enchantID"] = "3225",
+        ["burningcrusade"] = true,
+        ["name"] = "Executioner",
     },
-    ["44630"] = {
-        ["lvl"] = 60,
-        ["enchantID"] = "3828",
-        ["wotlk"] = true,
-        ["name"] = "Greater Savagery",
-        ["is2H"] = true,
-    },
-    ["44629"] = {
-        ["lvl"] = 60,
-        ["enchantID"] = "3830",
-        ["wotlk"] = true,
-        ["name"] = "Exceptional Spellpower",
-    },
-    ["44633"] = {
-        ["lvl"] = 60,
-        ["enchantID"] = "1103",
-        ["wotlk"] = true,
-        ["name"] = "Exceptional Agility",
-    },
+
     ["44510"] = {
         ["lvl"] = 60,
         ["enchantID"] = "3844",
@@ -299,12 +264,11 @@ GlowFoSho_enchants = {
         ["wotlk"] = true,
         ["name"] = "Icebreaker",
     },
-    ["60691"] = {
+    ["44576"] = {
         ["lvl"] = 60,
-        ["enchantID"] = "3827",
+        ["enchantID"] = "3241",
         ["wotlk"] = true,
-        ["name"] = "Massacre",
-        ["is2H"] = true,
+        ["name"] = "Lifeward",
     },
     ["44595"] = {
         ["lvl"] = 60,
@@ -319,17 +283,77 @@ GlowFoSho_enchants = {
         ["wotlk"] = true,
         ["name"] = "Giant Slayer",
     },
-    ["60714"] = {
+    ["44629"] = {
         ["lvl"] = 60,
-        ["enchantID"] = "3834",
+        ["enchantID"] = "3830",
         ["wotlk"] = true,
-        ["name"] = "Mighty Spellpower",
+        ["name"] = "Exceptional Spellpower",
     },
-    ["60707"] = {
+    ["44630"] = {
         ["lvl"] = 60,
-        ["enchantID"] = "3833",
+        ["enchantID"] = "3828",
         ["wotlk"] = true,
-        ["name"] = "Superior Potency",
+        ["name"] = "Greater Savagery",
+        ["is2H"] = true,
+    },
+    ["44633"] = {
+        ["lvl"] = 60,
+        ["enchantID"] = "1103",
+        ["wotlk"] = true,
+        ["name"] = "Exceptional Agility",
+    },
+
+    ["46578"] = {
+        ["lvl"] = 60,
+        ["enchantID"] = "3273",
+        ["burningcrusade"] = true,
+        ["name"] = "Deathfrost",
+    },
+
+    ["53331"] = {
+        ["lvl"] = 60,
+        ["enchantID"] = "3366",
+        ["runes"] = true,
+        ["name"] = "Rune of Lichbane",
+    },
+    ["53342"] = {
+        ["lvl"] = 57,
+        ["enchantID"] = "3367",
+        ["runes"] = true,
+        ["name"] = "Rune of Spellshattering",
+        ["is2H"] = true,
+    },
+    ["53343"] = {
+        ["lvl"] = 55,
+        ["enchantID"] = "3370",
+        ["runes"] = true,
+        ["name"] = "Rune of Razorice",
+    },
+    ["53344"] = {
+        ["lvl"] = 70,
+        ["enchantID"] = "3368",
+        ["runes"] = true,
+        ["name"] = "Rune of the Fallen Crusader",
+    },
+    ["54447"] = {
+        ["lvl"] = 57,
+        ["enchantID"] = "3595",
+        ["runes"] = true,
+        ["name"] = "Rune of Spellbreaking",
+    },
+
+    ["55057"] = {
+        ["lvl"] = 81,
+        ["enchantID"] = "4217",
+        ["cata"] = true,
+        ["name"] = "Pyrium Weapon Chain",
+    },
+
+    ["55836"] = {
+        ["lvl"] = 70,
+        ["enchantID"] = "3731",
+        ["wotlk"] = true,
+        ["name"] = "Titanium Weapon Chain",
     },
     ["59619"] = {
         ["lvl"] = 60,
@@ -349,29 +373,46 @@ GlowFoSho_enchants = {
         ["wotlk"] = true,
         ["name"] = "Black Magic",
     },
-    ["44576"] = {
+    ["60621"] = {
         ["lvl"] = 60,
-        ["enchantID"] = "3241",
+        ["enchantID"] = "1606",
         ["wotlk"] = true,
-        ["name"] = "Lifeward",
+        ["name"] = "Greater Potency",
     },
-    ["55836"] = {
-        ["lvl"] = 70,
-        ["enchantID"] = "3731",
+    ["60691"] = {
+        ["lvl"] = 60,
+        ["enchantID"] = "3827",
         ["wotlk"] = true,
-        ["name"] = "Titanium Weapon Chain",
+        ["name"] = "Massacre",
+        ["is2H"] = true,
     },
-    ["64579"] = {
-        ["lvl"] = 75,
-        ["enchantID"] = "3870",
+    ["60707"] = {
+        ["lvl"] = 60,
+        ["enchantID"] = "3833",
         ["wotlk"] = true,
-        ["name"] = "Blood Draining",
+        ["name"] = "Superior Potency",
     },
-    ["64441"] = {
-        ["lvl"] = 75,
-        ["enchantID"] = "3869",
+    ["60714"] = {
+        ["lvl"] = 60,
+        ["enchantID"] = "3834",
         ["wotlk"] = true,
-        ["name"] = "Blade Ward",
+        ["name"] = "Mighty Spellpower",
+    },
+
+    ["62158"] = {
+        ["lvl"] = 72,
+        ["enchantID"] = "3847",
+        ["runes"] = true,
+        ["name"] = "Rune of the Stoneskin Gargoyle",
+        ["is2H"] = true,
+    },
+
+    ["62948"] = {
+        ["lvl"] = 60,
+        ["enchantID"] = "3854",
+        ["wotlk"] = true,
+        ["name"] = "Greater Spellpower",
+        ["is2H"] = true,
     },
     ["62959"] = {
         ["lvl"] = 60,
@@ -380,19 +421,24 @@ GlowFoSho_enchants = {
         ["name"] = "Spellpower",
         ["is2H"] = true,
     },
-    ["62948"] = {
-        ["lvl"] = 60,
-        ["enchantID"] = "3854",
+    ["64441"] = {
+        ["lvl"] = 75,
+        ["enchantID"] = "3869",
         ["wotlk"] = true,
-        ["name"] = "Greater Spellpower",
-        ["is2H"] = true,
+        ["name"] = "Blade Ward",
     },
-    ["95471"] = {
+    ["64579"] = {
+        ["lvl"] = 75,
+        ["enchantID"] = "3870",
+        ["wotlk"] = true,
+        ["name"] = "Blood Draining",
+    },
+
+    ["74195"] = {
         ["lvl"] = 80,
-        ["enchantID"] = "4227",
+        ["enchantID"] = "4066",
         ["cata"] = true,
-        ["name"] = "Mighty Agility",
-        ["is2H"] = true,
+        ["name"] = "Mending",
     },
     ["74197"] = {
         ["lvl"] = 80,
@@ -406,29 +452,17 @@ GlowFoSho_enchants = {
         ["cata"] = true,
         ["name"] = "Elemental Slayer",
     },
-    ["74225"] = {
-        ["lvl"] = 80,
-        ["enchantID"] = "4084",
-        ["cata"] = true,
-        ["name"] = "Heartsong",
-    },
     ["74223"] = {
         ["lvl"] = 80,
         ["enchantID"] = "4083",
         ["cata"] = true,
         ["name"] = "Hurricane",
     },
-    ["74246"] = {
+    ["74225"] = {
         ["lvl"] = 80,
-        ["enchantID"] = "4099",
+        ["enchantID"] = "4084",
         ["cata"] = true,
-        ["name"] = "Landslide",
-    },
-    ["74195"] = {
-        ["lvl"] = 80,
-        ["enchantID"] = "4066",
-        ["cata"] = true,
-        ["name"] = "Mending",
+        ["name"] = "Heartsong",
     },
     ["74242"] = {
         ["lvl"] = 80,
@@ -442,74 +476,31 @@ GlowFoSho_enchants = {
         ["cata"] = true,
         ["name"] = "Windwalk",
     },
-    --["53341"] = {
-       -- ["lvl"] = 55,
-       -- ["enchantID"] = "3369",
-       -- ["runes"] = true,
-        --["name"] = "Rune of Cinderglacier",
-   -- },
-    ["53343"] = {
-        ["lvl"] = 55,
-        ["enchantID"] = "3370",
-        ["runes"] = true,
-        ["name"] = "Rune of Razorice",
-    },
-    ["54447"] = {
-        ["lvl"] = 57,
-        ["enchantID"] = "3595",
-        ["runes"] = true,
-        ["name"] = "Rune of Spellbreaking",
-    },
-    ["53342"] = {
-        ["lvl"] = 57,
-        ["enchantID"] = "3367",
-        ["runes"] = true,
-        ["name"] = "Rune of Spellshattering",
-        ["is2H"] = true,
-    },
-    ["53331"] = {
-        ["lvl"] = 60,
-        ["enchantID"] = "3366",
-        ["runes"] = true,
-        ["name"] = "Rune of Lichbane",
-    },
-   -- ["54446"] = {
-       -- ["lvl"] = 63,
-       -- ["enchantID"] = "3594",
-       -- ["runes"] = true,
-       -- ["name"] = "Rune of Swordbreaking",
-   -- },
-    --["53323"] = {
-      --  ["lvl"] = 63,
-      --  ["enchantID"] = "3365",
-      --  ["runes"] = true,
-      --  ["name"] = "Rune of Swordshattering",
-      --  ["is2H"] = true,
-   -- },
-    ["53344"] = {
-        ["lvl"] = 70,
-        ["enchantID"] = "3368",
-        ["runes"] = true,
-        ["name"] = "Rune of the Fallen Crusader",
-    },
-   -- ["70164"] = {
-       -- ["lvl"] = 72,
-        --["enchantID"] = "3883",
-        --["runes"] = true,
-        --["name"] = "Rune of the Nerubian Carapace",
-    --},
-    ["62158"] = {
-        ["lvl"] = 72,
-        ["enchantID"] = "3847",
-        ["runes"] = true,
-        ["name"] = "Rune of the Stoneskin Gargoyle",
-        ["is2H"] = true,
-    },
-    ["55057"] = {
-        ["lvl"] = 81,
-        ["enchantID"] = "4217",
+    ["74246"] = {
+        ["lvl"] = 80,
+        ["enchantID"] = "4099",
         ["cata"] = true,
-        ["name"] = "Pyrium Weapon Chain",
+        ["name"] = "Landslide",
+    },
+    ["95471"] = {
+        ["lvl"] = 80,
+        ["enchantID"] = "4227",
+        ["cata"] = true,
+        ["name"] = "Mighty Agility",
+        ["is2H"] = true,
+    },
+
+    ["104425"] = {
+        ["lvl"] = 85,
+        ["enchantID"] = "4441",
+        ["mop"] = true,
+        ["name"] = "Windsong",
+    },
+    ["104427"] = {
+        ["lvl"] = 85,
+        ["enchantID"] = "4442",
+        ["mop"] = true,
+        ["name"] = "Jade Spirit",
     },
     ["104430"] = {
         ["lvl"] = 85,
@@ -517,29 +508,17 @@ GlowFoSho_enchants = {
         ["mop"] = true,
         ["name"] = "Elemental Force",
     },
-    ["104425"] = {
-        ["lvl"] = 85,
-        ["enchantID"] = "4441",
-        ["mop"] = true,
-        ["name"] = "Windsong",
-    },
-    ["104440"] = {
-        ["lvl"] = 85,
-        ["enchantID"] = "4445",
-        ["mop"] = true,
-        ["name"] = "Colossus",
-    },
     ["104434"] = {
         ["lvl"] = 85,
         ["enchantID"] = "4444",
         ["mop"] = true,
         ["name"] = "Dancing Steel",
     },
-    ["104427"] = {
+    ["104440"] = {
         ["lvl"] = 85,
-        ["enchantID"] = "4442",
+        ["enchantID"] = "4445",
         ["mop"] = true,
-        ["name"] = "Jade Spirit",
+        ["name"] = "Colossus",
     },
     ["104442"] = {
         ["lvl"] = 85,
@@ -552,6 +531,229 @@ GlowFoSho_enchants = {
         ["enchantID"] = "5035",
         ["mop"] = true,
         ["name"] = "Glorious Tyranny",
+    },
+
+    ["159235"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5330",
+        ["wod"] = true,
+        ["name"] = "Mark of the Thunderlord",
+    },
+    ["159236"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5331",
+        ["wod"] = true,
+        ["name"] = "Mark of the Shattered Hand",
+    },
+    ["159671"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5337",
+        ["wod"] = true,
+        ["name"] = "Mark of Warsong",
+    },
+    ["159672"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5334",
+        ["wod"] = true,
+        ["name"] = "Mark of the Frostwolf",
+    },
+    ["159673"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5335",
+        ["wod"] = true,
+        ["name"] = "Mark of Shadowmoon",
+    },
+    ["159674"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5336",
+        ["wod"] = true,
+        ["name"] = "Mark of Blackrock",
+    },
+    ["170627"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5352",
+        ["wod"] = true,
+        ["name"] = "Glory of the Thunderlord",
+    },
+    ["170628"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5353",
+        ["wod"] = true,
+        ["name"] = "Glory of the Shadowmoon",
+    },
+    ["170629"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5354",
+        ["wod"] = true,
+        ["name"] = "Glory of the Blackrock",
+    },
+    ["170630"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5355",
+        ["wod"] = true,
+        ["name"] = "Glory of the Warsong",
+    },
+    ["170631"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5356",
+        ["wod"] = true,
+        ["name"] = "Glory of the Frostwolf",
+    },
+    ["173323"] = {
+        ["lvl"] = 95,
+        ["enchantID"] = "5384",
+        ["wod"] = true,
+        ["name"] = "Mark of Bleeding Hollow",
+    },
+
+    ["173716"] = {
+        ["enchantID"] = "5387",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Agility",
+    },
+    ["173717"] = {
+        ["enchantID"] = "2675",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Battlemaster",
+    },
+    ["173718"] = {
+        ["enchantID"] = "5391",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Berserking",
+    },
+    ["173719"] = {
+        ["enchantID"] = "5388",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Greater Spellpower",
+    },
+    ["173720"] = {
+        ["enchantID"] = "5393",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Crusader",
+    },
+    ["173721"] = {
+        ["enchantID"] = "4443",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Elemental Force",
+    },
+    ["173722"] = {
+        ["enchantID"] = "3225",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Executioner",
+    },
+    ["173723"] = {
+        ["enchantID"] = "803",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Fiery Weapon",
+    },
+    ["173724"] = {
+        ["enchantID"] = "5360",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Hidden",
+    },
+    ["173725"] = {
+        ["enchantID"] = "4099",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Landslide",
+    },
+    ["173726"] = {
+        ["enchantID"] = "1898",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Lifestealing",
+    },
+    ["173727"] = {
+        ["enchantID"] = "2673",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Mongoose",
+    },
+
+    ["173728"] = {
+        ["enchantID"] = "5364",
+        ["runes"] = true,
+        ["name"] = "Illusion: Poisoned",
+    },
+
+    ["173729"] = {
+        ["enchantID"] = "4097",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Power Torrent",
+    },
+    ["173730"] = {
+        ["enchantID"] = "2674",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Spellsurge",
+    },
+    ["173731"] = {
+        ["enchantID"] = "5389",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Striking",
+    },
+    ["173732"] = {
+        ["enchantID"] = "1899",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Unholy",
+    },
+    ["174979"] = {
+        ["enchantID"] = "5392",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Blood Draining",
+    },
+    ["175070"] = {
+        ["enchantID"] = "4442",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Jade Spirit",
+    },
+
+    ["175071"] = {
+        ["enchantID"] = "5399",
+        ["runes"] = true,
+        ["name"] = "Illusion: Frostbrand",
+    },
+    ["175072"] = {
+        ["enchantID"] = "5400",
+        ["runes"] = true,
+        ["name"] = "Illusion: Flametongue",
+    },
+    ["175074"] = {
+        ["enchantID"] = "5401",
+        ["runes"] = true,
+        ["name"] = "Illusion: Windfury",
+    },
+    ["175076"] = {
+        ["enchantID"] = "5398",
+        ["runes"] = true,
+        ["name"] = "Illusion: Earthliving",
+    },
+    ["175078"] = {
+        ["enchantID"] = "5402",
+        ["runes"] = true,
+        ["name"] = "Illusion: Rockbiter",
+    },
+
+    ["175085"] = {
+        ["enchantID"] = "4066",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Mending",
+    },
+    ["175086"] = {
+        ["enchantID"] = "4446",
+        ["illusion"] = true,
+        ["name"] = "Illusion: River's Song",
+    },
+    ["175165"] = {
+        ["enchantID"] = "5394",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Flames of Ragnaros",
+    },
+    ["178308"] = {
+        ["enchantID"] = "5396",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Glorious Tyranny",
+    },
+    ["178309"] = {
+        ["enchantID"] = "5397",
+        ["illusion"] = true,
+        ["name"] = "Illusion: Primal Victory",
     },
 
 }

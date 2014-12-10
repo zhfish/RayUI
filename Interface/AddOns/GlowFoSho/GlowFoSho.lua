@@ -2,18 +2,25 @@ GlowFoSho = LibStub("AceAddon-3.0"):NewAddon("GlowFoSho", "AceConsole-3.0", "Ace
 local L = LibStub("AceLocale-3.0"):GetLocale("GlowFoSho")
 local LD = LibStub("LibDropdown-1.0")
 
-local currWeaponLink, currWeaponEnchant
-GlowFoSho.eList = {}
-local tbl = GlowFoSho.eList
--- local showGlowless = false
-local showClassic = false
-local showBurningCrusade = false
-local showWotLK = false
-local showCata = false
-local showMop = false
-local showWOD = true
-local showRunes = false
-local onlyCompatible = true
+local currWeaponLink, currPrintLink, currWeaponEnchant
+
+GlowFoSho.classicList = {}
+local classicTbl = GlowFoSho.classicList
+GlowFoSho.bcList = {}
+local bcTbl = GlowFoSho.bcList
+GlowFoSho.wotlkList = {}
+local wotlkTbl = GlowFoSho.wotlkList
+GlowFoSho.cataList = {}
+local cataTbl = GlowFoSho.cataList
+GlowFoSho.mopList = {}
+local mopTbl = GlowFoSho.mopList
+GlowFoSho.wodList = {}
+local wodTbl = GlowFoSho.wodList
+GlowFoSho.classList = {}
+local classTbl = GlowFoSho.classList
+GlowFoSho.illList = {}
+local illTbl = GlowFoSho.illList
+
 -- the button
 local gfsbutton
 -- the dropdown
@@ -37,8 +44,8 @@ local function GetFormulaID(enchantID)
 				return formulaID
 			end
 		end
-		return
 	end
+    return
 end
 
 -- creates a link for an enchanting recipe with formulaID and name
@@ -52,7 +59,6 @@ local function SetEnchant(link, enchantID)
 	if link1 and link2 then
 		return link1 .. enchantID .. link2
 	end
-	
 	return
 end
 
@@ -61,46 +67,33 @@ local function GetEnchant(link)
 	return string.match(link,"item:%d+:(%d+)")
 end
 
--- returns the list of enchants for dewdrop menu
-local function UpdateEnchantList()
-	-- if there is no weapon equipped, empty the list
-	if not currWeaponLink then
-		for k in pairs(tbl) do
-			tbl[k] = nil
-		end
-		return
-	end
-
-	local weapMinlvl, _, _, _, is2H = select(5,GetItemInfo(currWeaponLink))
+-- loads the list of enchants for dewdrop menus
+local function LoadEnchantList()
 	local name
-	is2H = (is2H == "INVTYPE_2HWEAPON")
+
 	for formulaID, enchant in pairs(enchants) do
-		-- all enchants have are glowing now
-		-- if enchant.glowless and not showGlowless then
-		-- 	tbl[formulaID] = nil
-		-- else
-		if enchant.classic and not showClassic then
-			tbl[formulaID] = nil
-		elseif enchant.burningcrusade and not showBurningCrusade then
-			tbl[formulaID] = nil
-		elseif enchant.wotlk and not showWotLK then
-			tbl[formulaID] = nil
-		elseif enchant.cata and not showCata then
-			tbl[formulaID] = nil
-		elseif enchant.mop and not showMop then
-			tbl[formulaID] = nil
-		elseif enchant.runes and not showRunes then
-			tbl[formulaID] = nil
-		-- remove incompatible enchants if those should not be shown
-		elseif onlyCompatible and ((enchant.lvl and weapMinlvl < enchant.lvl) or (not is2H and enchant.is2H)) then
-			tbl[formulaID] = nil
-		else
-			if enchant.is2H then
-				name = enchant.name .. " (2H)"
-			else
-				name = enchant.name
-			end
-			tbl[formulaID] = L[name]
+        if enchant.is2H then
+            name = enchant.name .. " (2H)"
+        else
+            name = enchant.name
+        end
+
+		if enchant.classic then
+			classicTbl[formulaID] = L[name]
+		elseif enchant.burningcrusade then
+			bcTbl[formulaID] = L[name]
+		elseif enchant.wotlk  then
+			wotlkTbl[formulaID] = L[name]
+		elseif enchant.cata then
+			cataTbl[formulaID] = L[name]
+		elseif enchant.mop then
+			mopTbl[formulaID] = L[name]
+		elseif enchant.wod then
+			wodTbl[formulaID] = L[name]
+		elseif enchant.runes then
+			classTbl[formulaID] = L[name]
+		elseif enchant.illusion then
+			illTbl[formulaID] = L[name]
 		end
 	end
 end
@@ -131,7 +124,7 @@ function GlowFoSho:OnInitialize()
 	--register chat commands
 	self:RegisterChatCommand("glowfosho", "ChatCommand")
 	self:RegisterChatCommand("gfs", "ChatCommand")
-	
+
 	-- set up GlowFoSho button on the dressup frame
 	gfsbutton = CreateFrame("Button","GlowFoSho_Button",DressUpFrame)
 	gfsbutton:SetPoint("TOPRIGHT","DressUpFrame","TOPRIGHT",-50,-80)
@@ -146,6 +139,7 @@ function GlowFoSho:OnInitialize()
 	gfsbutton:RegisterForClicks("LeftButtonUp","RightButtonUp")
 	gfsbutton:SetScript("OnClick",function(self,button) if dropdownframe and dropdownframe:IsShown() then dropdownframe:Release() else GlowFoSho:OpenDropdown(self) end end)
 	gfsbutton:SetScript("OnHide",function() dropdownframe = dropdownframe and dropdownframe:Release() end)
+    LoadEnchantList()
 end
 
 function GlowFoSho:OpenDropdown(buttonframe)
@@ -171,76 +165,82 @@ function GlowFoSho:OpenDropdown(buttonframe)
 			classic = {
 				name = L["Show Classic Enchants"],
 				desc = L["Allows you to preview Classic enchants."],
-				type = "toggle",
-				get = function() return showClassic end,
-				set = function(info, v) showClassic = v; UpdateEnchantList(); self:OpenDropdown(buttonframe) end,
+				type = "select",
+				get = function(info) return currWeaponEnchant end,
+				set = function(info,v) self:EnchantWeaponByFormulaID(v) end,
+				values = self.classicList,
+				disabled = function() return not currPrintLink end,
 				order = 31
 			},
 			burningcrusade = {
 				name = L["Show BC Enchants"],
 				desc = L["Allows you to preview BC enchants."],
-				type = "toggle",
-				get = function() return showBurningCrusade end,
-				set = function(info, v) showBurningCrusade = v; UpdateEnchantList(); self:OpenDropdown(buttonframe) end,
+				type = "select",
+				get = function(info) return currWeaponEnchant end,
+				set = function(info,v) self:EnchantWeaponByFormulaID(v) end,
+				values = self.bcList,
+				disabled = function() return not currPrintLink end,
 				order = 32
 			},
 			wotlk = {
 				name = L["Show WotLK Enchants"],
 				desc = L["Allows you to preview WotLK enchants."],
-				type = "toggle",
-				get = function() return showWotLK end,
-				set = function(info, v) showWotLK = v; UpdateEnchantList(); self:OpenDropdown(buttonframe) end,
+				type = "select",
+				get = function(info) return currWeaponEnchant end,
+				set = function(info,v) self:EnchantWeaponByFormulaID(v) end,
+				values = self.wotlkList,
+				disabled = function() return not currPrintLink end,
 				order = 33
 			},
 			cata = {
 				name = L["Show Cata Enchants"],
 				desc = L["Allows you to preview Cata enchants."],
-				type = "toggle",
-				get = function() return showCata end,
-				set = function(info, v) showCata = v; UpdateEnchantList(); self:OpenDropdown(buttonframe) end,
+				type = "select",
+				get = function(info) return currWeaponEnchant end,
+				set = function(info,v) self:EnchantWeaponByFormulaID(v) end,
+				values = self.cataList,
+				disabled = function() return not currPrintLink end,
 				order = 34
 			},
 			mop = {
 				name = L["Show Mop Enchants"],
 				desc = L["Allows you to preview Mop enchants."],
-				type = "toggle",
-				get = function() return showMop end,
-				set = function(info, v) showMop = v; UpdateEnchantList(); self:OpenDropdown(buttonframe) end,
+				type = "select",
+				get = function(info) return currWeaponEnchant end,
+				set = function(info,v) self:EnchantWeaponByFormulaID(v) end,
+				values = self.mopList,
+				disabled = function() return not currPrintLink end,
 				order = 35
 			},
 			wod = {
-				name = L["Show wod Enchants"],
-				desc = L["Allows you to preview wod enchants."],
-				type = "toggle",
-				get = function() return showwod end,
-				set = function(info, v) showwod = v; UpdateEnchantList(); self:OpenDropdown(buttonframe) end,
+				name = L["Show WoD Enchants"],
+				desc = L["Allows you to preview WoD enchants."],
+				type = "select",
+				get = function(info) return currWeaponEnchant end,
+				set = function(info,v) self:EnchantWeaponByFormulaID(v) end,
+				values = self.wodList,
+				disabled = function() return not currPrintLink end,
 				order = 36
+			},
+			illusions = {
+				name = L["Show Illusions"],
+				desc = L["Allows you to preview Enchanter's Illusions."],
+				type = "select",
+				get = function(info) return currWeaponEnchant end,
+				set = function(info,v) self:EnchantWeaponByFormulaID(v) end,
+				values = self.illList,
+				disabled = function() return not currPrintLink end,
+				order = 37
 			},
 			runes = {
 				name = L["Show DK Runes"],
 				desc = L["Allows you to preview Runes which are created by DKs."],
-				type = "toggle",
-				get = function() return showRunes end,
-				set = function(info, v) showRunes = v; UpdateEnchantList(); self:OpenDropdown(buttonframe) end,
-				order = 37
-			},
-			compatible = {
-				name = L["Show Only Compatible Enchants"],
-				desc = L["Filters out enchants that cannot be applied to the currently previewed weapon."],
-				type = "toggle",
-				get = function() return onlyCompatible end,
-				set = function(info, v) onlyCompatible = v; UpdateEnchantList(); self:OpenDropdown(buttonframe) end,
-				order = 38
-			},
-			enchants = {
-				name = L["Enchants"],
-				desc = L["List of weapon enchants you can preview."],
 				type = "select",
 				get = function(info) return currWeaponEnchant end,
 				set = function(info,v) self:EnchantWeaponByFormulaID(v) end,
-				values = self.eList,
-				disabled = function() return not next(self.eList) end,
-				order = 40
+				values = self.classList,
+				disabled = function() return not currPrintLink end,
+				order = 38
 			},
 			clear = {
 				name = L["Clear"],
@@ -271,7 +271,7 @@ function GlowFoSho:OpenDropdown(buttonframe)
 		oside = "TOPLEFT"
 	end
 	dropdownframe:SetPoint(oside, buttonframe, side)
-	
+
 end
 
 function GlowFoSho:OnEnable()
@@ -282,7 +282,7 @@ function GlowFoSho:OnEnable()
 	self:SecureHook("DressUpItemLink")
 	self:HookScript(DressUpFrame,"OnShow","OnDressUpFrameShow")
 	self:HookScript(DressUpFrameResetButton,"OnClick","OnDressUpFrameResetButtonClick")
-	
+
 	-- chat handler for enchanting over chat
 	self:RegisterEvent("CHAT_MSG_WHISPER","ChatHandler")
 	-- filter out addon messages
@@ -302,7 +302,8 @@ function GlowFoSho:OnDisable()
 end
 
 -- hook to DressUpItemLink function
-function GlowFoSho:DressUpItemLink(link)
+function GlowFoSho:DressUpItemLink(link, formulaID)
+    self:Print("trying to dress up " .. gsub(link, "\124", "\124\124") .. " echanted with formular" .. formulaID)
 	if link then
 		local iType
 		local _, link, _, _, _, iType = GetItemInfo(link)
@@ -310,56 +311,83 @@ function GlowFoSho:DressUpItemLink(link)
 		-- if previewing weapon, set the currWeaponLink link to passed link
 		if iType == ENCHSLOT_WEAPON then
 			currWeaponLink = link
+			currPrintLink = link
 		end
 	end
 
 	if not currWeaponLink then
-		currWeaponLink = GetInventoryItemLink("player",GetInventorySlotInfo("MainHandSlot"))
-		currWeaponEnchant = nil
+        local slot = GetInventorySlotInfo("MainHandSlot")
+		currPrintLink = GetInventoryItemLink("player",slot)
+
+        if currPrintLink then
+            local isTransed, _, _, _, _, transId, _ =  GetTransmogrifySlotInfo(slot)
+            if isTransed and transId then
+                currWeaponLink = "|cff1eff00|Hitem:" .. transId .. ":" .. GetEnchant(currPrintLink) .. ":0:0:0:0:0:0:0:0:0:0|h[unseen]|h|r"
+            else
+                currWeaponLink = currPrintLink
+            end
+        else
+            currWeaponLink = nil
+        end
+
+        currWeaponEnchant = nil
 	end
 
 	if currWeaponLink then
-		currWeaponEnchant = GetFormulaID(GetEnchant(currWeaponLink))
+		currWeaponEnchant = formulaID
 	end
-	UpdateEnchantList()
 end
 
 -- reset previous enchants when DressUp frame shows up
 function GlowFoSho:OnDressUpFrameShow(...)
 	currWeaponLink = nil
+	currPrintLink = nil
 	currWeaponEnchant = nil
 end
 
 -- reset previous enchants when Reset button is pressed.
 -- enchant is set to currently equiped weapon data
 function GlowFoSho:OnDressUpFrameResetButtonClick(...)
-	currWeaponLink = GetInventoryItemLink("player",GetInventorySlotInfo("MainHandSlot"))
-	if currWeaponLink then
-		currWeaponEnchant = GetFormulaID(GetEnchant(currWeaponLink))
-	end
+    local slot = GetInventorySlotInfo("MainHandSlot")
+    currPrintLink = GetInventoryItemLink("player",slot)
+
+    if currPrintLink then
+        local isTransed, _, _, _, _, transId, _ =  GetTransmogrifySlotInfo(slot)
+        if isTransed and transId then
+            currWeaponLink = "|cff1eff00|Hitem:" .. transId .. ":" .. GetEnchant(currPrintLink) .. ":0:0:0:0:0:0:0:0:0:0|h[unseen]|h|r"
+        else
+            currWeaponLink = currPrintLink
+        end
+    else
+        currWeaponLink = nil
+    end
+
+    currWeaponEnchant = nil
 end
 
 -- enchant and preview weapon
 function GlowFoSho:EnchantWeaponByFormulaID(formulaID)
 	if currWeaponLink and enchants[formulaID] then
-		self:EnchantWeapon(enchants[formulaID].enchantID)
+		self:EnchantWeapon(enchants[formulaID].enchantID, formulaID)
 	end
 end
 
 -- enchant and preview weapon by enchantID
-function GlowFoSho:EnchantWeapon(enchantID)
+function GlowFoSho:EnchantWeapon(enchantID, formulaID)
 	if currWeaponLink then
 		local newLink = SetEnchant(currWeaponLink,enchantID)
 		if newLink then
-			DressUpItemLink(newLink)
+            local temp = SetEnchant(currPrintLink,enchantID)
+			DressUpItemLink(newLink, formulaID)
+            currPrintLink = temp
 		end
 	end
 end
 
 -- prints out link to the currently previewed weapon with a currently previewed enchant
 function GlowFoSho:GetWeaponLink()
-	if currWeaponLink then
-		self:Print(currWeaponLink)
+	if currPrintLink then
+		self:Print(currPrintLink)
 	end
 end
 
@@ -377,7 +405,7 @@ end
 function GlowFoSho:GetCurrEnchant()
 	local enchant = enchants[currWeaponEnchant]
 	if enchant then
-		return currWeaponEnchant, enchant.name, enchant.enchantID, enchant.is2H, enchant.glowless, enchant.classic, enchant.burningcrusade, enchant.wotlk, enchant.runes
+		return currWeaponEnchant
 	end
 end
 
@@ -385,8 +413,9 @@ end
 function GlowFoSho:ClearEnchant()
 	if currWeaponLink then
 		currWeaponLink = SetEnchant(currWeaponLink,0)
-		DressUpItemLink(currWeaponLink)
-		DressUpItemLink(currWeaponLink)
+        local temp = SetEnchant(currPrintLink,0)
+		DressUpItemLink(currWeaponLink, nil)
+        currPrintLink = temp
 	end
 end
 
@@ -395,12 +424,12 @@ function GlowFoSho:ChatHandler(event, msg, author)
 	if not string.match(msg,"^" .. L["!glow"]) then
 		return
 	end
-	
+
 	if msg == L["!glow"] then
 		SendChatMessage(L["glow>"] .. " " .. L["Syntax: !glow <weapon link> <enchant link>"],"WHISPER",nil,author)
 		return
 	end
-	
+
 	local weaponLink = string.match(msg,"|c%x+|Hitem:.-|h|r")
 	if weaponLink and select(6,GetItemInfo(weaponLink)) == ENCHSLOT_WEAPON then
 		local formulaID = string.match(msg,"Henchant:(%d+)")
