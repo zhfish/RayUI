@@ -1,14 +1,14 @@
 ## Interface: 60000
-## Title: 要塞管家
-## Notes: 显示该帐号下所有角色的要塞进度
+## Title: Broker: Garrison
+## Notes: Display Garrison missons for all Characters
 ## Author: smb
-## Version: 1.2.1
+## Version: 1.4.1
 ## X-Category: Miscellaneous
 ## SavedVariables: Broker_GarrisonDB
 ## X-Email: sb@sbuehl.com
 ## OptionalDeps: Ace3, CallbackHandler-1.0, LibQTip-1.0, LibStub, LibSink-2.0, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, LibDataBroker-1.1, LibToast-1.0, AdiDebug
 ## X-Embeds: Ace3, CallbackHandler-1.0, LibQTip-1.0, LibStub, LibSink-2.0, LibSharedMedia-3.0, AceGUI-3.0-SharedMediaWidgets, LibDataBroker-1.1, LibToast-1.0
-## X-Curse-Packaged-Version: 1.2.1
+## X-Curse-Packaged-Version: 1.4.1
 ## X-Curse-Project-Name: Broker Garrison
 ## X-Curse-Project-ID: broker-garrison
 ## X-Curse-Repository-ID: wow/broker-garrison/mainline
@@ -40,6 +40,10 @@ Locales\deDE.lua
 Locales\zhTW.lua
 Locales\zhCN.lua
 Locales\frFR.lua
+Locales\esES.lua
+Locales\esMX.lua
+Locales\koKR.lua
+Locales\ruRU.lua
 
 core.lua
 helper.lua

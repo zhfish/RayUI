@@ -434,6 +434,18 @@ function Garrison:GetOptions()
 								end,
 								disabled = function() return not configDb.notification.mission.enabled end,
 							},
+							notificationQueueEnabled = {
+								order = 315,
+								type = "toggle",
+								width = "full",
+								name = L["Summary on login"],
+								desc = L["Summary on login"],
+								get = function() return configDb.notification.mission.notificationQueueEnabled end,
+								set = function(_,v) configDb.notification.mission.notificationQueueEnabled = v
+								end,
+								disabled = function() return not configDb.notification.mission.enabled
+														or not configDb.notification.mission.toastEnabled end,
+							},
 							toastPersistent = {
 								order = 320,
 								type = "toggle",
@@ -572,6 +584,18 @@ function Garrison:GetOptions()
 								end,
 								disabled = function() return not configDb.notification.building.enabled end,
 							},
+							notificationQueueEnabled = {
+								order = 315,
+								type = "toggle",
+								width = "full",
+								name = L["Summary on login"],
+								desc = L["Summary on login"],
+								get = function() return configDb.notification.building.notificationQueueEnabled end,
+								set = function(_,v) configDb.notification.building.notificationQueueEnabled = v
+								end,
+								disabled = function() return not configDb.notification.building.enabled
+														or not configDb.notification.building.toastEnabled end,
+							},							
 							toastPersistent = {
 								order = 320,
 								type = "toggle",
@@ -711,6 +735,18 @@ function Garrison:GetOptions()
 								end,
 								disabled = function() return not configDb.notification.shipment.enabled end,
 							},
+							notificationQueueEnabled = {
+								order = 315,
+								type = "toggle",
+								width = "full",
+								name = L["Summary on login"],
+								desc = L["Summary on login"],
+								get = function() return configDb.notification.shipment.notificationQueueEnabled end,
+								set = function(_,v) configDb.notification.shipment.notificationQueueEnabled = v
+								end,
+								disabled = function() return not configDb.notification.shipment.enabled
+														or not configDb.notification.shipment.toastEnabled end,
+							},							
 							toastPersistent = {
 								order = 320,
 								type = "toggle",
@@ -974,6 +1010,41 @@ function Garrison:GetOptions()
 								set = function(_,v)
 									configDb.general.mission.showFollowers = v
 								end,								
+							},			
+							showRewards = {
+								order = 91,
+								type = "toggle",
+								width = "full",
+								name = L["Show rewards for each mission"],
+								desc = L["Show rewards for each mission"],
+								get = function() return configDb.general.mission.showRewards end,
+								set = function(_,v)
+									configDb.general.mission.showRewards = v
+								end,
+							},
+							showRewardXP = {
+								order = 92,
+								type = "toggle",
+								width = "full",
+								name = L["Show follower XP rewards"],
+								desc = L["Show follower XP rewards"],
+								get = function() return configDb.general.mission.showRewardsXP end,
+								set = function(_,v)
+									configDb.general.mission.showRewardsXP = v
+								end,
+								disabled = function() return not configDb.general.mission.showRewards end,
+							},	
+							showRewardsAmount = {
+								order = 93,
+								type = "toggle",
+								width = "full",
+								name = L["Show reward amount"],
+								desc = L["Show reward amount"],
+								get = function() return configDb.general.mission.showRewardsAmount end,
+								set = function(_,v)
+									configDb.general.mission.showRewardsAmount = v
+								end,
+								disabled = function() return not configDb.general.mission.showRewards end,
 							},							
 							groupHeader = {
 								order = 100,
@@ -1151,7 +1222,7 @@ function Garrison:GetOptions()
 					about = {
 						order = 300,
 						type = "description",
-						name = ("Author: %s <EU-Khaz'Goroth>\nLayout: %s <EU-Khaz'Goroth>"):format(Garrison.getColoredUnitName("Smb","PRIEST"), Garrison.getColoredUnitName("Hotaruby","DRUID")),
+						name = ("Author: %s <EU-Khaz'Goroth>\nLayout: %s <EU-Khaz'Goroth>"):format(Garrison.getColoredUnitName("Smb","PRIEST", "EU-Khaz'Goroth"), Garrison.getColoredUnitName("Hotaruby","DRUID", "EU-Khaz'Goroth")),
 						cmdHidden = true,
 					},
 				},
@@ -1290,7 +1361,7 @@ function Garrison.getDataOptionTable()
 				order = baseOrder + (i * 10),
 				type = "description",
 				width = "normal",
-				name = Garrison.getColoredUnitName(playerData.info.playerName, playerData.info.playerClass),
+				name = Garrison.getColoredUnitName(playerData.info.playerName, playerData.info.playerClass, realmName),
 				cmdHidden = true,
 			}
 			dataTable[prefixDataOptionTooltip..(baseOrder + i)] = {

@@ -55,6 +55,12 @@ Garrison.iconCache = iconCache
 local patternCache = {}
 Garrison.patternCache = patternCache
 
+local notificationQueue = {}
+Garrison.notificationQueue = notificationQueue
+local notificationQueueEnabled = false
+
+Garrison.data = {}
+
 -- Garrison Functions
 local debugPrint, pairsByKeys, formatRealmPlayer, tableSize, getColoredString, getColoredUnitName, formattedSeconds, getIconString
 
@@ -62,6 +68,7 @@ local debugPrint, pairsByKeys, formatRealmPlayer, tableSize, getColoredString, g
 local TOAST_MISSION_COMPLETE = "BrokerGarrisonMissionComplete"
 local TOAST_BUILDING_COMPLETE = "BrokerGarrisonBuildingComplete"
 local TOAST_SHIPMENT_COMPLETE = "BrokerGarrisonShipmentComplete"
+local TOAST_SUMMARY = "BrokerGarrisonSummary"
 
 local DB_DEFAULTS = {
 	profile = {
@@ -74,6 +81,9 @@ local DB_DEFAULTS = {
 				collapseOtherCharsOnLogin = false,
 				compactTooltip = false,
 				showFollowers = false,
+				showRewards = true,
+				showRewardsAmount = false,
+				showRewardsXP = false,				
 			},
 			building = {
 				hideBuildingWithoutShipments = false,
@@ -165,6 +175,7 @@ local DB_DEFAULTS = {
 				hideBlizzardNotification = true,
 				hideMinimapPulse = false,
 				compactToast = false,
+				notificationQueueEnabled = true,
 			},
 			building = {
 				enabled = true,
@@ -174,6 +185,7 @@ local DB_DEFAULTS = {
 				hideBlizzardNotification = true,
 				hideMinimapPulse = false,
 				compactToast = false,
+				notificationQueueEnabled = true,
 			},
 			shipment = {
 				enabled = true,
@@ -183,6 +195,7 @@ local DB_DEFAULTS = {
 				hideBlizzardNotification = true,
 				hideMinimapPulse = false,
 				compactToast = false,
+				notificationQueueEnabled = true,
 			},			
 		},
 		display = {
@@ -263,6 +276,9 @@ function Garrison:RegisterEvents()
 	self:RegisterEvent("GARRISON_UPDATE", "BuildingUpdate")
 	self:RegisterEvent("SHIPMENT_UPDATE", "ShipmentStatusUpdate")
 
+	Garrison:CheckInvasionAvailable()
+	Garrison:CheckBuildingInfo()
+
 end
 
 function Garrison:LoadDependencies()
@@ -284,14 +300,25 @@ local function toastCallback (callbackType, mouseButton, buttonDown, payload)
 	local missionData = payload[1]
 
 	if callbackType == "primary" then
-		debugPrint("OK: "..payload[1].id.." ("..payload[1].name..")")
+		debugPrint("OK: "..payload[1].name)
 	end
 	if callbackType == "secondary" then
-		debugPrint("Dismiss: "..payload[1].id.." ("..payload[1].name..")")
-		missionData.notification = 2 -- Mission dismissed, never show again
+		debugPrint("Dismiss: "..payload[1].name)
+		--missionData.notification = 2 -- Mission dismissed, never show again
 		missionData.notificationDismissed = true
 	end
 end
+
+local function toastSummary (toast, text, notificationType)
+	if configDb.notification[notificationType].toastPersistent then
+		toast:MakePersistent()
+	end
+
+	toast:SetTitle((L["%s - Summary"]):format(Garrison.NotificationTitle[notificationType]))
+	toast:SetFormattedText(text)
+	toast:SetIconTexture(Garrison.Icon[notificationType])
+end
+
 
 local function toastMissionComplete (toast, text, missionData)
 	if configDb.notification.mission.toastPersistent then
@@ -341,6 +368,57 @@ local function toastShipmentComplete (toast, text, shipmentData)
 	end
 end
 
+function Garrison:HandleNotificationQueue()
+	if notificationQueue ~= nil and notificationQueue.lastUpdate and (time() - notificationQueue.lastUpdate) > 5 then
+		-- send notification queue and delete
+		local notificationCopy = notificationQueue
+		notificationQueue = nil
+
+		for notificationType,data in pairs(notificationCopy.data) do
+			local toastEnabled = configDb.notification[notificationType].toastEnabled
+
+			local toastText = ""
+
+			for key,value in pairs(data) do
+			
+				toastText = toastText..("%s: %s\n"):format(key, getColoredString(value, colors.white))
+
+				debugPrint(("[%s] HandleNotificationQueue (%s): %s"):format(notificationType, key, value))
+			end
+
+			if toastEnabled then							
+				Toast:Spawn(TOAST_SUMMARY, toastText, notificationType)
+			end
+		end
+	end
+end
+
+
+function Garrison:AddNotificationToQueue(notificationType, paramCharInfo)
+	local key = formatRealmPlayer(paramCharInfo, true)
+
+	if notificationQueue == nil or notificationQueue.data == nil then
+		notificationQueue = {
+			firstUpdate = time(),
+			data = {}
+		}
+	end
+
+	notificationQueue.lastUpdate = time()
+
+	if notificationQueue.data[notificationType] == nil then
+		notificationQueue.data[notificationType] = {}
+	end
+
+	if notificationQueue.data[notificationType][key] == nil then
+		notificationQueue.data[notificationType][key] = 1
+	else
+		notificationQueue.data[notificationType][key] = notificationQueue.data[notificationType][key] + 1
+	end
+
+	debugPrint(("[%s] AddNotificationToQueue (%s): %s"):format(notificationType, key, notificationQueue.data[notificationType][key]))
+end
+
 
 function Garrison:SendNotification(paramCharInfo, data, notificationType)
 
@@ -358,7 +436,7 @@ function Garrison:SendNotification(paramCharInfo, data, notificationType)
 
 				if not Garrison:DisableInInstance() then
 
-					local notificationText, toastName, toastText, soundName, toastEnabled, playSound
+					local notificationText, toastName, toastText, soundName, toastEnabled, playSound, notificationTitle, notificationQueueEnabled
 
 					if configDb.notification[notificationType].compactToast then
 						toastText = ("%s\n%s"):format(formatRealmPlayer(paramCharInfo, true), data.name)
@@ -367,8 +445,10 @@ function Garrison:SendNotification(paramCharInfo, data, notificationType)
 					end
 
 					toastEnabled = configDb.notification[notificationType].toastEnabled
-					playSound = configDb.notification[notificationType].PlaySound
-					soundName = configDb.notification[notificationType].SoundName or "None"
+					playSound = configDb.notification[notificationType].playSound
+					soundName = configDb.notification[notificationType].soundName or "None"
+					notificationQueueEnabled = configDb.notification[notificationType].notificationQueueEnabled
+
 
 					if (notificationType == TYPE_MISSION) then
 						notificationText = (L["Mission complete (%s): %s"]):format(formatRealmPlayer(paramCharInfo, false), data.name)
@@ -376,7 +456,7 @@ function Garrison:SendNotification(paramCharInfo, data, notificationType)
 					elseif (notificationType == TYPE_BUILDING) then
 						notificationText = (L["Building complete (%s): %s"]):format(formatRealmPlayer(paramCharInfo, false), data.name)
 						toastName = TOAST_BUILDING_COMPLETE
-					elseif (notificationType == TYPE_SHIPMENT) then
+					elseif (notificationType == TYPE_SHIPMENT) then						
 
 						if configDb.notification[notificationType].compactToast then
 							toastText = ("%s\n%s (%s / %s)"):format(formatRealmPlayer(paramCharInfo, true), data.name, data.shipmentsReadyEstimate, data.shipmentsTotal)
@@ -386,20 +466,24 @@ function Garrison:SendNotification(paramCharInfo, data, notificationType)
 						
 						notificationText = (L["Shipment complete (%s): %s (%s / %s)"]):format(formatRealmPlayer(paramCharInfo, false), data.name, data.shipmentsReadyEstimate, data.shipmentsTotal)
 						toastName = TOAST_SHIPMENT_COMPLETE
-
 						data.notificationValue = data.shipmentsReadyEstimate
 					end
 
-					debugPrint(notificationText)
+					if not addonInitialized and notificationQueueEnabled then
+						-- don't display notifications, just save them and prepare for later output
+						Garrison:AddNotificationToQueue(notificationType, paramCharInfo, notificationTitle)
+					else
+						debugPrint(notificationText)
 
-					self:Pour(notificationText, colors.green.r, colors.green.g, colors.green.b)
+						self:Pour(notificationText, colors.green.r, colors.green.g, colors.green.b)
 
-					if toastEnabled then
-						Toast:Spawn(toastName, toastText, data)
-					end
+						if toastEnabled then
+							Toast:Spawn(toastName, toastText, data)
+						end
 
-					if playSound then
-						PlaySoundFile(LSM:Fetch("sound", soundName))
+						if playSound then
+							PlaySoundFile(LSM:Fetch("sound", soundName))
+						end
 					end
 
 					data.notification = 1
@@ -879,20 +963,35 @@ do
 							row = AddRow(tooltip)
 
 							tooltip:SetCell(row, 1, playerData.missionsExpanded and Garrison.ICON_CLOSE or Garrison.ICON_OPEN)
-							tooltip:SetCell(row, 2, ("%s"):format(getColoredUnitName(playerData.info.playerName, playerData.info.playerClass)))
+							tooltip:SetCell(row, 2, ("%s"):format(getColoredUnitName(playerData.info.playerName, playerData.info.playerClass, realmName)))
 							--tooltip:SetCell(row, 3, ("%s %s %s %s"):format(Garrison.ICON_CURRENCY, BreakUpLargeNumbers(playerData.currencyAmount or 0), Garrison.ICON_CURRENCY_APEXIS, BreakUpLargeNumbers(playerData.currencyApexisAmount or 0)))
 							
 								
-							tooltip:SetCell(row, 3, getColoredString((L["In Progress: %s | Complete: %s | Total: %s"]):format(missionCount.inProgress, missionCount.complete, missionCount.total), colors.lightGray), nil, "RIGHT", 2)
+							local textInProgress, textComplete, textTotal -- = L["In Progress: %s"], L["Complete: %s"], L["Total: %s"]
+							local colorInProgress, colorComplete
+							local textPlaceholder = getColoredString(" | ", colors.lightGray)
 
-						--	tooltip:SetCell(row, 4, getColoredString((L["Total: %s"]):format(missionCount.total), colors.lightGray))
-							--tooltip:SetCell(row, 5, getColoredString((L["In Progress: %s"]):format(missionCount.inProgress), colors.lightGray))
-							--tooltip:SetCell(row, 6, getColoredString((L["Complete: %s"]):format(missionCount.complete), colors.lightGray))
+							colorComplete = (missionCount.complete > 0) and colors.green or colors.white
+
+							if missionCount.inProgress > 3 then
+								colorInProgress = colors.white
+							elseif missionCount.inProgress >= 1 then
+								colorInProgress = colors.yellow
+							else
+								colorInProgress = colors.red
+							end
+
+							colorComplete = (missionCount.complete > 0) and colors.green or colors.white
+
+							textInProgress = (getColoredString(L["In Progress: %s"], colors.lightGray)):format(getColoredString(missionCount.inProgress, colorInProgress))
+							textComplete = (getColoredString(L["Complete: %s"], colors.lightGray)):format(getColoredString(missionCount.complete, colorComplete))
+							textTotal = (getColoredString(L["Total: %s"], colors.lightGray)):format(missionCount.total)
+
+
+							tooltip:SetCell(row, 3, ("%s%s%s%s%s"):format(textInProgress, textPlaceholder, textComplete, textPlaceholder, textTotal), nil, "RIGHT", 2)
 
 							tooltip:SetCellScript(row, 1, "OnMouseUp", ExpandButton_OnMouseUp, {("%s:%s"):format(realmName, playerName), Garrison.TYPE_MISSION})
-							--tooltip:SetCellScript(row, 1, "OnMouseDown", ExpandButton_OnMouseDown, {playerData.missionsExpanded, Garrison.TYPE_MISSION})
 							tooltip:SetCellScript(row, 2, "OnMouseUp", ExpandButton_OnMouseUp, {("%s:%s"):format(realmName, playerName), Garrison.TYPE_MISSION})
-							--tooltip:SetCellScript(row, 2, "OnMouseDown", ExpandButton_OnMouseDown, {playerData.missionsExpanded, Garrison.TYPE_MISSION})
 
 							AddEmptyRow(tooltip)
 							AddSeparator(tooltip)
@@ -934,7 +1033,39 @@ do
 									if configDb.display.showIcon then
 										tooltip:SetCell(row, 1, getIconString(missionData.typeAtlas, configDb.display.iconSize, true), nil, "LEFT", 1)
 									end
-									tooltip:SetCell(row, 2, missionData.name, nil, "LEFT", 2)
+
+									local rewardString = ""
+
+									if configDb.general.mission.showRewards and missionData.rewards ~= nil then
+										local showReward
+										for rewardId, rewardData in pairs(missionData.rewards) do
+											showReward = true
+
+											if rewardData.followerXP and not configDb.general.mission.showRewardsXP then
+												showReward = false
+											end 
+
+											if showReward then
+												if rewardData.icon or rewardData.itemID then
+													rewardString = rewardString.." "..getIconString(rewardData.icon or rewardData.itemID, configDb.display.iconSize, false, true)
+												end
+
+												if configDb.general.mission.showRewardsAmount then
+													local rewardAmount = rewardData.quantity or rewardData.followerXP
+
+													if rewardAmount ~= nil and rewardAmount > 1 then
+														if rewardData.currencyID == 0 then -- money
+															rewardAmount = math.floor(rewardAmount / 10000)
+														end
+
+														rewardString = rewardString.." "..getColoredString(("%s"):format(rewardAmount), colors.lightGray)
+													end
+												end
+											end
+										end
+									end
+
+									tooltip:SetCell(row, 2, missionData.name..rewardString, nil, "LEFT", 2)
 
 									if (missionData.start == -1) then
 										local formattedTime = ("~%s %s"):format(
@@ -1033,9 +1164,18 @@ do
 								estimatedCacheResourceAmount = getColoredString((" (%s)"):format(math.min(500, tmpResources)), resourceColor)
 							end
 
+							local invasionAvailable = ""
+
+							if playerData.invasion and playerData.invasion.available then
+								invasionAvailable = Garrison.ICON_INVASION
+							end
+
 							tooltip:SetCell(row, 1, playerData.buildingsExpanded and Garrison.ICON_CLOSE or Garrison.ICON_OPEN, nil, "LEFT", 1, nil, 0, 0, 20, 20)
-							tooltip:SetCell(row, 2, ("%s"):format(getColoredUnitName(playerData.info.playerName, playerData.info.playerClass)), nil, "LEFT", 3)
-							tooltip:SetCell(row, 5, ("%s %s%s %s %s"):format(Garrison.ICON_CURRENCY_TOOLTIP, BreakUpLargeNumbers(playerData.currencyAmount or 0), estimatedCacheResourceAmount, Garrison.ICON_CURRENCY_APEXIS_TOOLTIP, BreakUpLargeNumbers(playerData.currencyApexisAmount or 0)), nil, "RIGHT", 1)
+							tooltip:SetCell(row, 2, ("%s %s"):format(getColoredUnitName(playerData.info.playerName, playerData.info.playerClass, realmName), invasionAvailable), nil, "LEFT", 3)
+							tooltip:SetCell(row, 5, ("%s %s %s %s%s %s %s"):format(Garrison.ICON_CURRENCY_TEMPERED_FATE, BreakUpLargeNumbers(playerData.currencySealOfTemperedFateAmount or 0), 
+								Garrison.ICON_CURRENCY_TOOLTIP, BreakUpLargeNumbers(playerData.currencyAmount or 0), estimatedCacheResourceAmount, 
+								Garrison.ICON_CURRENCY_APEXIS_TOOLTIP, BreakUpLargeNumbers(playerData.currencyApexisAmount or 0)), 
+							nil, "RIGHT", 1)
 
 							tooltip:SetCellScript(row, 1, "OnMouseUp", ExpandButton_OnMouseUp, {("%s:%s"):format(realmName, playerName), Garrison.TYPE_BUILDING})
 							--tooltip:SetCellScript(row, 1, "OnMouseDown", ExpandButton_OnMouseDown, {playerData.buildingsExpanded, Garrison.TYPE_BUILDING})
@@ -1048,7 +1188,7 @@ do
 							if not (playerData.buildingsExpanded) then
 								
 
-								local playerBuildingUpgrade = ("%s"):format(getColoredUnitName(playerData.info.playerName, playerData.info.playerClass))
+								local playerBuildingUpgrade = ("%s"):format(getColoredUnitName(playerData.info.playerName, playerData.info.playerClass, realmName))
 
 								local formattedShipment = ""
 
@@ -1097,7 +1237,7 @@ do
 
 									if not configDb.general.building.hideBuildingWithoutShipments or 
 										(buildingData.isBuilding or buildingData.canActivate) or
-										(buildingData.shipment and buildingData.shipment.shipmentCapacity) then 							
+										(buildingData.shipment and buildingData.shipment.shipmentCapacity ~= nil and buildingData.shipment.shipmentCapacity > 0) then 							
 
 										if groupBy and #groupBy > 0 then
 											local groupByValue = Garrison.getTableValue(buildingData, unpack(groupBy))
@@ -1157,7 +1297,7 @@ do
 											rank = getColoredString("("..buildingData.rank..")", colors.lightGray)
 										end
 
-										buildingInfoIcon = buildingInfoIcon..Garrison:GetLootInfoForBuilding(playerData.lootedToday, buildingData.id)
+										buildingInfoIcon = buildingInfoIcon..Garrison:GetLootInfoForBuilding(playerData, buildingData.id)
 
 										if configDb.display.showIcon then
 											--tooltip:SetCell(row, 1, getIconString(, configDb.display.iconSize, false, false), nil, "LEFT", 1)
@@ -1194,7 +1334,7 @@ do
 
 											tooltip:SetCell(row, 5, formattedTime, nil, "LEFT", 1)
 
-										elseif buildingData.shipment and buildingData.shipment.name then
+										elseif buildingData.shipment and buildingData.shipment.name and (buildingData.shipment.shipmentCapacity ~= nil and buildingData.shipment.shipmentCapacity > 0) then
 											local shipmentData = buildingData.shipment
 
 											local shipmentsReady, shipmentsInProgress, shipmentsAvailable, timeLeftNext, timeLeftTotal = Garrison:DoShipmentMagic(shipmentData, playerData.info)
@@ -1374,11 +1514,15 @@ function Garrison:UpdateLDB()
 
 	local currencyTotal, currencyAmount = 0, 0
 	local currencyApexisAmount, currencyApexisTotal = 0, 0
+	local currencySealOfTemperedFateAmount = 0
 
 	local resourceCacheAmount, resourceCacheAmountMax = 0, 0
 	local resourceCacheAmountMaxChar = nil
 
 	local now = time()
+
+	local invasionAvailable
+	local invasionAvailableCurrent
 
 	for realmName, realmData in pairs(globalDb.data) do
 		for playerName, playerData in pairs(realmData) do
@@ -1387,13 +1531,21 @@ function Garrison:UpdateLDB()
 			if Garrison.isCurrentChar(playerData.info) then
 				currencyAmount = (playerData.currencyAmount or 0)
 				currencyApexisAmount = playerData.currencyApexisAmount or 0
+				currencySealOfTemperedFateAmount = playerData.currencySealOfTemperedFateAmount or 0
 				
 				resourceCacheAmount = tmpResourceCacheAmount or 0
+
+				if playerData.invasion and playerData.invasion.available then
+					debugPrint("invasionAvailableCurrent!!!!!")
+					invasionAvailableCurrent = true
+				end
 			end
 			currencyTotal = currencyTotal + (playerData.currencyAmount or 0)
-			currencyApexisTotal = currencyApexisTotal + (playerData.currencyApexisAmount or 0)
+			currencyApexisTotal = currencyApexisTotal + (playerData.currencyApexisAmount or 0)			
+			if playerData.invasion and playerData.invasion.available then
+				invasionAvailable = true
+			end			
 
-			
 			if tmpResourceCacheAmount then
 				if tmpResourceCacheAmount > resourceCacheAmountMax then
 					resourceCacheAmountMax = tmpResourceCacheAmount
@@ -1412,6 +1564,7 @@ function Garrison:UpdateLDB()
 		buildingCountCurrent = buildingCountCurrent,		
 		currencyAmount = currencyAmount,
 		currencyApexisAmount = currencyApexisAmount,
+		currencySealOfTemperedFateAmount = currencySealOfTemperedFateAmount,
 		currencyApexisTotal = currencyApexisTotal,
 		currencyTotal = currencyTotal,
 		currencyIcon = Garrison.ICON_CURRENCY,
@@ -1420,7 +1573,10 @@ function Garrison:UpdateLDB()
 		resourceCacheAmountMax = resourceCacheAmountMax,
 		resourceCacheAmountMaxChar = resourceCacheAmountMaxChar,
 		resourceCacheAmount = resourceCacheAmount,
+		invasionAvailable = invasionAvailable,
+		invasionAvailableCurrent = invasionAvailableCurrent,
 	}
+	Garrison.data = data
 
 
 	ldb_object_mission.text = Garrison.replaceVariables(Garrison:GetLDBText(Garrison.TYPE_MISSION), data)
@@ -1495,6 +1651,7 @@ function Garrison:OnInitialize()
 	Toast:Register(TOAST_MISSION_COMPLETE, toastMissionComplete)
 	Toast:Register(TOAST_BUILDING_COMPLETE, toastBuildingComplete)
 	Toast:Register(TOAST_SHIPMENT_COMPLETE, toastShipmentComplete)
+	Toast:Register(TOAST_SUMMARY, toastSummary)
 
 	Garrison:UpdateConfig()
 

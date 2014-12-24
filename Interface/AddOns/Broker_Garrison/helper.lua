@@ -200,6 +200,16 @@ function Garrison.getIconString(name, size, isAtlas, ...)
 
 			else				
 				local iconZoom = ...
+
+				if type(name) == 'number' then
+					local _, _, _, _, _, _, _, _, _, itemTexture, _ = _G.GetItemInfo(name)
+                    if itemTexture == nil then
+    					return ""
+                    end
+                    name = itemTexture
+				end
+
+
 				if iconZoom then			
 					Garrison.iconCache[key] = string.format("\124T%s:%d:%d:1:0:64:64:4:60:4:60\124t", Garrison.GetIconPath(name), size, size)
 				else
@@ -218,10 +228,10 @@ function Garrison.getIconString(name, size, isAtlas, ...)
 	return icon
 end
 
-function Garrison.getColoredUnitName (name, class)
+function Garrison.getColoredUnitName (name, class, realm)
 	local colorUnitName
 
-	if(not unitColor[name]) then
+	if(not unitColor[realm..name]) then
 		local classColor = Garrison.COLOR_TABLE[class]
 
 		if not classColor then
@@ -230,9 +240,9 @@ function Garrison.getColoredUnitName (name, class)
 
 		colorUnitName = string.format("|cff%02x%02x%02x%s|r",classColor.r*255,classColor.g*255,classColor.b*255,name)
 
-		unitColor[name] = colorUnitName
+		unitColor[realm..name] = colorUnitName
 	else
-		colorUnitName = unitColor[name]
+		colorUnitName = unitColor[realm..name]
 	end
 	return colorUnitName
 end
@@ -287,7 +297,7 @@ function Garrison.formatRealmPlayer(paramCharInfo, colored)
 	if not paramCharInfo then return "" end
 
 	if colored then
-		return ("%s (%s)"):format(Garrison.getColoredUnitName(paramCharInfo.playerName, paramCharInfo.playerClass), paramCharInfo.realmName)
+		return ("%s (%s)"):format(Garrison.getColoredUnitName(paramCharInfo.playerName, paramCharInfo.playerClass, paramCharInfo.realmName), paramCharInfo.realmName)
 	else
 		return ("%s-%s"):format(paramCharInfo.playerName, paramCharInfo.realmName)
 	end
@@ -410,6 +420,20 @@ function Garrison.itemIdFromLink(itemLink)
 		return tonumber(itemId)
 	end
 	return nil
+end
+
+
+function Garrison.GetNextWeeklyResetTime()
+	local nextDailyReset = Garrison.GetNextDailyResetTime()
+	if (nextDailyReset == nil) then
+		return nil
+	end
+
+	local dayOfNextReset = date("*t", nextDailyReset).wday
+	local daysToWeeklyReset = math.fmod(7 + Garrison.WeeklyResetDay - dayOfNextReset, 7)
+	local nextWeeklyReset = nextDailyReset + (daysToWeeklyReset * 86400) -- 86400 is number of seconds in a day (24 * 60 * 60)
+ 
+	return nextWeeklyReset
 end
 
 function Garrison.GetNextDailyResetTime()
