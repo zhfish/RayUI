@@ -1,4 +1,29 @@
 ------------------------------------------------------------------------
+r106 | boneschaman | 2014-12-16 23:10:59 +0000 (Tue, 16 Dec 2014) | 2 lines
+Changed paths:
+   M /trunk/locales/Locale-deDE.lua
+   M /trunk/locales/Locale-enUS.lua
+   M /trunk/locales/Locale-frFR.lua
+   M /trunk/locales/Locale-zhCN.lua
+   M /trunk/locales/Locale-zhTW.lua
+
+GlowFoSho:
+- locale cleanup
+------------------------------------------------------------------------
+r105 | boneschaman | 2014-12-14 22:49:45 +0000 (Sun, 14 Dec 2014) | 2 lines
+Changed paths:
+   M /trunk/GlowFoSho.lua
+
+GlowFoSho:
+- show level at enchants
+------------------------------------------------------------------------
+r104 | boneschaman | 2014-12-10 20:20:23 +0000 (Wed, 10 Dec 2014) | 2 lines
+Changed paths:
+   M /trunk/GlowFoSho.lua
+
+GlowFoSho:
+- another nil bug fixed
+------------------------------------------------------------------------
 r103 | boneschaman | 2014-12-09 21:37:20 +0000 (Tue, 09 Dec 2014) | 2 lines
 Changed paths:
    M /trunk/GlowFoSho.lua

@@ -7,12 +7,12 @@
  \//\/_/  \/___/    \/_/
  
  [=====================================]
- [  Author: Dandruff @ Whisperwind-US  ]
- [  xCT+ Version 3.x.x                 ]
- [  ?012. All Rights Reserved.        ]
+ [  Author: Dandraffbal-Stormreaver US ]
+ [  xCT+ Version 4.x.x                 ]
+ [  ©2014. All Rights Reserved.        ]
  [====================================]]
-
- -- This file is a static default profile.  After your first profile is created, editing this file will do nothing.
+ 
+-- This file is a static default profile.  After your first profile is created, editing this file will do nothing.
 local ADDON_NAME, addon = ...
 
 -- =====================================================
@@ -33,23 +33,23 @@ end
 
 addon.defaults = {
   profile = {
-    showStartupText = false,
+    showStartupText = true,
     hideConfig = true,
     
     blizzardFCT = {
-      blizzardHeadNumbers = true,
-      enabled = true,
-      font = "RayUI Normal",
-      fontName = [[Fonts\ARHei.TTF]],
+      blizzardHeadNumbers = false,
+      enabled = false,
+      font = "Homespun (xCT+)",
+      fontName = [[Interface\AddOns\]] .. ADDON_NAME .. [[\media\HOOGE.TTF]],
       fontSize = 32,
-      fontOutline = "2OUTLINE",
+      fontOutline = "4MONOCHROMEOUTLINE",
       
       -- CVars
-      ["CombatThreatChanges"] = true,
-      ["CombatDamage"] = true,
-      ["CombatHealing"] = true,
-      ["PetMeleeDamage"] = true,
-      ["CombatLogPeriodicSpells"] = true,
+      ["CombatThreatChanges"] = false,
+      ["CombatDamage"] = false,
+      ["CombatHealing"] = false,
+      ["PetMeleeDamage"] = false,
+      ["CombatLogPeriodicSpells"] = false,
       ["CombatHealingAbsorbTarget"] = false,
       ["fctSpellMechanics"] = false,
       ["fctSpellMechanicsOther"] = false,
@@ -80,13 +80,13 @@ addon.defaults = {
       -- position
         ["X"] = 0,
         ["Y"] = 224,
-        ["Width"] = 256,
+        ["Width"] = 512,
         ["Height"] = 128,
         
       -- fonts
-        ["font"] = "RayUI Normal",
-        ["fontSize"] = 18,
-        ["fontOutline"] = "2OUTLINE",
+        ["font"] = "Homespun (xCT+)",
+        ["fontSize"] = 20,
+        ["fontOutline"] = "4MONOCHROMEOUTLINE",
         ["fontJustify"] = "CENTER",
 
       -- font colors
@@ -138,6 +138,7 @@ addon.defaults = {
       -- scrollable
         ["enableScrollable"] = false,
         ["scrollableLines"] = 10,
+        ["scrollableInCombat"] = false,
         
       -- fading text
         ["enableCustomFade"] = false,
@@ -165,15 +166,15 @@ addon.defaults = {
         ["megaDamage"] = false,
         
       -- position
-        ["X"] = 382,
-        ["Y"] = 58,
-        ["Width"] = 128,
-        ["Height"] = 260,
+        ["X"] = 480,
+        ["Y"] = 0,
+        ["Width"] = 192,
+        ["Height"] = 320,
         
       -- fonts
-        ["font"] = "RayUI Normal",
-        ["fontSize"] = 15,
-        ["fontOutline"] = "2OUTLINE",
+        ["font"] = "Homespun (xCT+)",
+        ["fontSize"] = 20,
+        ["fontOutline"] = "4MONOCHROMEOUTLINE",
         ["fontJustify"] = "RIGHT",
         
       -- font colors
@@ -205,7 +206,7 @@ addon.defaults = {
 
       -- icons
         ["iconsEnabled"] = true,
-        ["iconsSize"] = 28,
+        ["iconsSize"] = 16,
         
       -- scrollable
         ["enableScrollable"] = false,
@@ -230,8 +231,8 @@ addon.defaults = {
       },
       
       critical = {
-        ["enabledFrame"] = false,
-        ["secondaryFrame"] = 2,
+        ["enabledFrame"] = true,
+        ["secondaryFrame"] = 0,
         ["insertText"] = "bottom",
         ["alpha"] = 100,
         ["megaDamage"] = false,
@@ -243,9 +244,9 @@ addon.defaults = {
         ["Height"] = 128,
         
       -- fonts
-        ["font"] = "RayUI Normal",
+        ["font"] = "Homespun (xCT+)",
         ["fontSize"] = 30,
-        ["fontOutline"] = "2OUTLINE",
+        ["fontOutline"] = "4MONOCHROMEOUTLINE",
         ["fontJustify"] = "RIGHT",
         
       -- font colors
@@ -266,7 +267,7 @@ addon.defaults = {
         
       -- icons
         ["iconsEnabled"] = true,
-        ["iconsSize"] = 28,
+        ["iconsSize"] = 16,
         
       -- scrollable
         ["enableScrollable"] = false,
@@ -287,20 +288,20 @@ addon.defaults = {
       damage = {
         ["enabledFrame"] = true,
         ["secondaryFrame"] = 0,
-        ["insertText"] = "bottom",
+        ["insertText"] = "top",
         ["alpha"] = 100,
         ["megaDamage"] = false,
         
       -- position
-        ["X"] = -325,
-        ["Y"] = -30,
-        ["Width"] = 190,
+        ["X"] = -448,
+        ["Y"] = -88,
+        ["Width"] = 128,
         ["Height"] = 144,
         
       -- fonts
-        ["font"] = "RayUI Normal",
-        ["fontSize"] = 15,
-        ["fontOutline"] = "2OUTLINE",
+        ["font"] = "Homespun (xCT+)",
+        ["fontSize"] = 20,
+        ["fontOutline"] = "4MONOCHROMEOUTLINE",
         ["fontJustify"] = "LEFT",
 
       -- font colors
@@ -323,6 +324,15 @@ addon.defaults = {
               ['missTypeResist']  = { enabled = false, desc = "Resisted", default = { 0.50, 0.50, 0.50 } },
               ['missTypeBlock']   = { enabled = false, desc = "Blocked",  default = { 0.50, 0.50, 0.50 } },
               ['missTypeAbsorb']  = { enabled = false, desc = "Asorbed",  default = { 0.50, 0.50, 0.50 } },
+            },
+          },
+          
+          ['missTypesTakenPartial'] = {
+            enabled = false, desc = "Miss Types |cff798BDD(Partials)|r",
+            colors = {
+              ['missTypeResistPartial']  = { enabled = false, desc = "Resisted |cff798BDD(Partial)|r", default = { 0.75, 0.50, 0.50 } },
+              ['missTypeBlockPartial']   = { enabled = false, desc = "Blocked |cff798BDD(Partial)|r",  default = { 0.75, 0.50, 0.50 } },
+              ['missTypeAbsorbPartial']  = { enabled = false, desc = "Asorbed |cff798BDD(Partial)|r",  default = { 0.75, 0.50, 0.50 } },
             },
           },
         },
@@ -351,15 +361,15 @@ addon.defaults = {
         ["megaDamage"] = false,
       
       -- positioon
-        ["X"] = -415,
-        ["Y"] = 5,
-        ["Width"] = 128,
-        ["Height"] = 260,
+        ["X"] = -288,
+        ["Y"] = 88,
+        ["Width"] = 448,
+        ["Height"] = 144,
         
       -- fonts
-        ["font"] = "RayUI Normal",
-        ["fontSize"] = 15,
-        ["fontOutline"] = "2OUTLINE",
+        ["font"] = "Homespun (xCT+)",
+        ["fontSize"] = 20,
+        ["fontOutline"] = "4MONOCHROMEOUTLINE",
         ["fontJustify"] = "LEFT",
         
       -- font colors
@@ -383,15 +393,17 @@ addon.defaults = {
         ["visibilityTime"] = 5,
         
       -- special tweaks
-        ["showFriendlyHealers"] = false,
+        ["showFriendlyHealers"] = true,
         ["enableClassNames"] = true,
-        ["enableRealmNames"] = false,
-        ["enableOverHeal"] = false,
+        ["enableRealmNames"] = true,
+        ["enableOverHeal"] = true,
         ["enableSelfAbsorbs"] = true,
+        ["showOnlyMyHeals"] = true,
+        ["showOnlyPetHeals"] = true,
       },
       
       class = {
-        ["enabledFrame"] = false,
+        ["enabledFrame"] = true,
         ["alpha"] = 100,
         
       -- position
@@ -401,9 +413,9 @@ addon.defaults = {
         ["Height"] = 64,
         
       -- fonts
-        ["font"] = "RayUI Normal",
+        ["font"] = "HOOGE (xCT)",
         ["fontSize"] = 32,
-        ["fontOutline"] = "2OUTLINE",
+        ["fontOutline"] = "4MONOCHROMEOUTLINE",
         
       -- font colors
         colors = {
@@ -421,14 +433,14 @@ addon.defaults = {
         
       -- position
         ["X"] = 0,
-        ["Y"] = -95,
+        ["Y"] = -64,
         ["Width"] = 256,
         ["Height"] = 128,
         
       -- fonts
-        ["font"] = "RayUI Normal",
-        ["fontSize"] = 15,
-        ["fontOutline"] = "2OUTLINE",
+        ["font"] = "Homespun (xCT+)",
+        ["fontSize"] = 20,
+        ["fontOutline"] = "4MONOCHROMEOUTLINE",
         ["fontJustify"] = "CENTER",
         
       -- font colors
@@ -452,8 +464,8 @@ addon.defaults = {
       },
       
       procs = {
-        ["enabledFrame"] = false,
-        ["secondaryFrame"] = 1,
+        ["enabledFrame"] = true,
+        ["secondaryFrame"] = 0,
         ["insertText"] = "top",
         ["alpha"] = 100,
         
@@ -464,9 +476,9 @@ addon.defaults = {
         ["Height"] = 128,
         
       -- fonts
-        ["font"] = "RayUI Normal",
+        ["font"] = "Homespun (xCT+)",
         ["fontSize"] = 20,
-        ["fontOutline"] = "2OUTLINE",
+        ["fontOutline"] = "4MONOCHROMEOUTLINE",
         ["fontJustify"] = "CENTER",
         
       -- font colors
@@ -499,14 +511,14 @@ addon.defaults = {
         
       -- position 
         ["X"] = 0,
-        ["Y"] = -245,
-        ["Width"] = 325,
+        ["Y"] = -224,
+        ["Width"] = 512,
         ["Height"] = 128,
         
       -- fonts
-        ["font"] = "RayUI Normal",
-        ["fontSize"] = 15,
-        ["fontOutline"] = "2OUTLINE",
+        ["font"] = "Homespun (xCT+)",
+        ["fontSize"] = 20,
+        ["fontOutline"] = "4MONOCHROMEOUTLINE",
         ["fontJustify"] = "CENTER",
         
       -- icons
@@ -550,7 +562,7 @@ addon.defaults = {
       mergeCriticalsByThemselves = false,
       
       -- Abbreviate or Groups Settings
-      formatAbbreviate = true,
+      formatAbbreviate = true, 
       formatGroups = false,
       
       combo = {
@@ -585,14 +597,14 @@ addon.defaults = {
             --CreateComboSpellEntry(true, 82925),           --   Ready, Set, Aim...
           },
           [3] = {                                         -- Survival
-            CreateComboSpellEntry(true, 56453),           --   Lock 'n Load
+            CreateComboSpellEntry(true, 168980), --56453),           --   Lock 'n Load
           },
         },
         
         ["MAGE"] = {
-          [1] = { },    -- Arcane
-          [2] = { },    -- Fire
-          [3] = { },    -- Frost
+          [1] = { },    -- Arcane (Arcane Charge 114664)
+          [2] = { },    -- Fire (Heating Up)
+          [3] = { },    -- Frost (Fingers of Frost 112965)
         },
         
         ["MONK"] = {
@@ -639,7 +651,7 @@ addon.defaults = {
 
         ["SHAMAN"] = {
           [1] = {                                         -- Elemental
-            CreateComboSpellEntry(true, 324),             --   Fulmination
+            CreateComboSpellEntry(true, 324),             --   Fulmination (Stacks up to 20??)
           },    
           [2] = {                                         -- Enhancement
             CreateComboSpellEntry(true, 53817),           --   Maelstrom Weapon
@@ -690,15 +702,14 @@ addon.defaults = {
       ["whitelistDebuffs"]  = false,
       ["whitelistSpells"]   = false,
       ["whitelistProcs"]    = false,
-	  ["whitelistItems"]    = false,
-	  
+      ["whitelistItems"]    = false,
       ["trackSpells"]       = false,
-      
+
       listBuffs    = { },  -- Used to filter gains/fades of buffs    (Spell Name)
       listDebuffs  = { },  -- Used to filter gains/fades of debuffs  (Spell Name)
       listSpells   = { },  -- Used to filter outgoing spells         (Spell ID)
       listProcs    = { },  -- Used to filter spell procs             (Proc Name)
-	  listItems    = { },  -- Used to filter Items                   (Item ID)
+      listItems    = { },  -- Used to filter Items                   (Item ID)
       
       -- Minimal Spell Amount
       filterPowerValue = 0,

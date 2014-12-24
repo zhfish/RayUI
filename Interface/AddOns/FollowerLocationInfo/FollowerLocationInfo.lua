@@ -11,6 +11,7 @@ ns.faction, ns.factionLocale = UnitFactionGroup("player"); L[ns.faction] = ns.fa
 nFaction = ((ns.faction=="Alliance") and 1) or ((ns.faction=="Horde") and 2) or 0;
 
 FollowerLocationInfo_Toggle, FollowerLocationInfo_ToggleCollected, FollowerLocationInfo_ToggleIDs, FollowerLocationInfo_ResetConfig,FollowerLocationInfo_MinimapButton,FollowerLocationInfo_ToggleList=nil,nil,nil,nil,nil,nil;
+local NUM_FILTERS = 3;
 local configMenu, List_Update, FollowerLocationInfoFrame_OnEvent,ExternalURL;
 local nFaction = (ns.faction=="Alliance") and 1 or 2;
 local followers, zoneNames, classes, collectGroups, classNames1, classNames2, abilityNames,counterNames = nil,{},{},{},{},{},{},{};
@@ -22,7 +23,7 @@ local ListButtonOffsetX, ListButtonOffsetY = 0,1;
 local updateLock,onEvent=false,false;
 local ListEntrySelected, ListEntries = false,{};
 local FollowersCollected,knownAbilities = {},{};
-local SearchStr,ClassFilter,AbilityFilter = "","","";
+local SearchStr,Filters,ClassFilter,AbilityFilter = "",{},"","";
 local ids = {[32]=true,[34]=true,[153]=true,[154]=true,[155]=true,[157]=true,[159]=true,[168]=true,[170]=true,[171]=true,[176]=true,[177]=true,[178]=true,[179]=true,[180]=true,[182]=true,[183]=true,[184]=true,[185]=true,[186]=true,[189]=true,[190]=true,[192]=true,[193]=true,[194]=true,[195]=true,[202]=true,[203]=true,[204]=true,[205]=true,[207]=true,[208]=true,[209]=true,[211]=true,[212]=true,[216]=true,[217]=true,[218]=true,[219]=true,[224]=true,[225]=true,[453]=true,[455]=true,[458]=true,[459]=true,[460]=true,[462]=true,[463]=true};
 local factionZoneOrder = (ns.faction:lower()=="alliance") and {962,947,971,949,946,948,950,941,978,1009,964,969,984,987,988,989,993,994,995,1008,-1,0}
 														   or {962,941,976,949,946,948,950,947,978,1011,964,969,984,987,988,989,993,994,995,1008,-1,0};
@@ -229,64 +230,6 @@ local function IsQuestCompleted(QuestID)
 	return (questsCompleted.ids[QuestID]==true);
 end
 
---[=[
-local IsMissing = {npcs={},coords={},zones={},quests={},completed={},descs={}};
-IsMissing.chk=function(id,data)
-	local hasQuests,hasNpcs,hasDesc = false,false,false;
-	if (data.zone==nil) or (data.zone==0) then
-		tinsert(IsMissing.zones,id);
-	end
-
-	if (data.complete~=true) then
-		tinsert(IsMissing.completed,id);
-	end
-
-	for i,v in ipairs(data) do
-		if (v[1]=="quest") or (v[1]=="questrow") or (v[1]=="event") then
-			hasQuests = true;
-			for I,V in ipairs(v) do
-				if (I>1) and (type(V[2])=="number") and (V[2]~=0) and (ns.npcs[V[2]]==nil) then
-					tinsert(IsMissing.npcs,V[2]);
-				end
-			end
-		elseif (v[1]=="vendor") then
-			for I,V in ipairs(v) do
-				if (I>1) and (type(V[1])=="number") and (V[1]~=0) and (ns.npcs[V[1]]==nil) then
-					tinsert(IsMissing.npcs,V[1]);
-				end
-			end
-		elseif (v[1]=="desc") then
-			hasDesc=true;
-		end
-	end
-
-	if (not hasQuests) then
-		tinsert(IsMissing.quests,id);
-	end
-
-	if (not hasDesc) then
-		tinsert(IsMissing.descs,id);
-	end
-end
-]=]
---[[
-ns.addFollower = function(id,neutral,data1,data2,notCount)
-	local Data = ((neutral) and data1) or ((ns.faction=="Alliance") and data1 or data2) or {};
-	if (#Data>0) and (Data.zone~=0) and (not Data.ignore) then
-		ns.followers[id] = Data;
-		if (Data.collectGroup) and (collectGroups[Data.collectGroup]==nil) then
-			collectGroups[Data.collectGroup]=false;
-		end
-		if (not notCount) then
-			numKnownFollowers = numKnownFollowers + 1;
-		end
-	end
-	if (not notCount) then
-		IsMissing.chk(id,Data);
-	end
-end
-]]
-
 local Collector = {data={},hLink=false};
 do
 	local this,tt = Collector;
@@ -392,7 +335,7 @@ local function GetFollowers()
 			local abilities={};
 
 			if (v) then
-				d = {name=getLocale("follower",tostring(i)),followerID=i,collected=false,desc={}};
+				d = {name=ns.follower_locales[tostring(i)][nFaction],followerID=i,collected=false,desc={}};
 				d.level,d.quality,d.classSpec,d.portraitIconID,d.displayID,d.abilities,d.race,d.class = unpack( v[nFaction] );
 				if (type(d.abilities)=="number") then
 					d.abilities={d.abilities};
@@ -444,9 +387,8 @@ local function GetFollowers()
 					end
 				end
 
-				d.className = getLocale("classspec",tostring(d.classSpec)) or "";
-
 				-- class and specc
+				d.className = ns.classspec_locales[tostring(d.classSpec)];
 				d.classColor = (classes[d.class:upper()]) and classes[d.class:upper()].colorStr or "";
 
 				-- add class and class specc names to filter table;
@@ -550,7 +492,7 @@ function configMenu(self,anchorA,anchorB)
 			},
 		--}},
 		{ separator = true },
-		{ label = "Follower list", title=true }, --childs = {
+		{ label = L["Follower list"], title=true }, --childs = {
 			{
 				label = L["Show FollowerID"], tooltip={L["Follower ID"],L["Show/Hide followerID's in follower list"]},
 				dbType="bool", keyName="ShowFollowerID",
@@ -568,7 +510,7 @@ function configMenu(self,anchorA,anchorB)
 			},
 		--}},
 		{ separator = true },
-		{ label = "Misc.", title=true },--childs = {
+		{ label = L["Misc."], title=true },--childs = {
 			{
 				label = L["Show coordination frame"], --tooltip = {L[""],L[""]},
 				dbType="bool", keyName="ShowCoordsFrame",
@@ -604,13 +546,13 @@ local function Desc_AddInfo(self, count, objType, ...)
 	local p,objs,_ = self.Child,{...};
 	local obj = objs[1];
 
-	local addLine = function(title, text, img, menu, tooltip)
+	local addLine = function(title, text, img, menu, tooltip, click)
 		local l = nil
 
 		count = count + 1;
 
 		if (not self.lines[count]) then
-			self.lines[count] = CreateFrame("Frame",nil,p,"FollowerLocationInfoDescLineTemplate");
+			self.lines[count] = CreateFrame("Button",nil,p,"FollowerLocationInfoDescLineTemplate");
 			l = self.lines[count];
 		else
 			l = self.lines[count];
@@ -620,12 +562,13 @@ local function Desc_AddInfo(self, count, objType, ...)
 
 		if (img) then
 			l.img:SetTexture("Interface\\addons\\"..addon.."\\media\\follower_"..self.info.followerID.."_"..img)
-			l:SetHeight(l.img:GetHeight()+6);
+			--l.imgText:SetText();
+			l:SetHeight( l.title:GetHeight() + l.img:GetHeight() + 8 );
 			l.img:Show();
+			--l.imgText:Show();
 		else
 			l.text:SetText(text);
-			local h1,h2 = l.title:GetHeight(),l.text:GetHeight();
-			l:SetHeight( ((h1>h2) and h1 or h2) + 6);
+			l:SetHeight( l.title:GetHeight() + l.text:GetHeight() + 8 );
 			l.text:Show();
 		end
 
@@ -636,11 +579,15 @@ local function Desc_AddInfo(self, count, objType, ...)
 			l.Options:Hide();
 		end
 
-		--[[
 		if (tooltip) then
 			l.tooltip = tooltip;
 		end
-		]]
+
+		if (click)then
+			l:SetScript("OnClick",click);
+		else
+			l:SetScript("OnClick",nil);
+		end
 
 		l:SetParent(p);
 		l:SetPoint("TOP", (count==1) and p or self.lines[count-1], (count==1) and "TOP" or "BOTTOM", 0, (count==1) and -12 or -6);
@@ -678,7 +625,7 @@ local function Desc_AddInfo(self, count, objType, ...)
 		end
 		for i,v in ipairs(objs) do
 			local menu = {};
-			qState, qGiver, qZone, qCoord, str = 0, "", "zone?", "?.?, ?.?", "%s|n  » %s(%s @ %s)" --"%s|n    %s|n    (%s @ %s)"
+			qState, qGiver, qZone, qCoord, str = 0, "", "zone?", "?.?, ?.?", "%s|n  %s(%s @ %s)" --"%s|n    %s|n    (%s @ %s)"
 			qTitle = GetQuestTitle(v[1]);
 			qTitle2 = qTitle;
 			if (qTitle) then
@@ -712,7 +659,7 @@ local function Desc_AddInfo(self, count, objType, ...)
 					qCoord = L[v[4]];
 				end
 
-				addLine(title, str:format(qTitle2, qGiver.."|n   ", qZone, qCoord),nil,menu);
+				addLine(title, str:format(qTitle2, (qGiver~="") and "» ".. qGiver.."|n   " or " ", qZone, qCoord),nil,menu);
 			elseif v[1]==0 then
 				addLine(title, L["Missing quest..."]);
 			elseif (qTitle==false) then
@@ -773,11 +720,11 @@ local function Desc_AddInfo(self, count, objType, ...)
 			end
 
 			if (npc) and (location) then
-				addLine(title,("%s|n    %s"):format(npc,location), nil, menu,{title,npc,location});
+				addLine(title,("%s|n    %s"):format(npc,location), nil, menu);
 			elseif (npc) then
-				addLine(title,npc,nil,nil,{title,npc});
+				addLine(title,npc,nil,nil);
 			elseif (location) then
-				addLine(title,location, nil, menu,{title,location});
+				addLine(title,location, nil, menu);
 			end
 			title = "";
 		end
@@ -812,16 +759,36 @@ local function Desc_AddInfo(self, count, objType, ...)
 		end
 		addLine(L["Requirements"], table.concat(req,"|n"));
 	elseif (objType=="achievement") then
-		local str = "";
+		local str,lnk = "";
 		local IDNumber, Name, Points, Completed, Month, Day, Year, Description, Flags, Image, RewardText, IsGuild, WasEarnedByMe, EarnedBy = GetAchievementInfo(obj);
 		local Char=UnitName("player");
 		if (IDNumber) then
-			local lnk = GetAchievementLink(obj);
+			lnk = GetAchievementLink(obj);
 			str = lnk;
 		else
 			str = L["Can't get achievement data. %d isn't an achievement id?"]:format(obj);
 		end
-		addLine(L["Achievement"], str, nil, {});
+		addLine(L["Achievement"], str, nil, nil,
+			function(self,tt) -- tooltip
+				tt:SetHyperlink(lnk)
+				--print(obj,lnk)
+			end,
+			function(self,button) -- click
+				if ( not AchievementFrame ) then
+					AchievementFrame_LoadUI();
+				end
+				if ( not AchievementFrame:IsShown() ) then
+					AchievementFrame_ToggleAchievementFrame();
+					AchievementFrame_SelectAchievement(obj);
+				else
+					if ( AchievementFrameAchievements.selection ~= obj ) then
+						AchievementFrame_SelectAchievement(obj);
+					else
+						AchievementFrame_ToggleAchievementFrame();
+					end
+				end
+			end
+		);
 	elseif (objType=="abilities") then
 		local text = {};
 		if (type(obj)=="table") then
@@ -936,7 +903,7 @@ local function Desc_Update()
 			{"Version",GetAddOnMetadata(addon,"Version")},
 			{"slash commands","/fli or /followerlocationinfo"},
 			--{"Msg from Dev","|cff44eeffHello Friends.|n|nchanged |n|nHave a nice day|r"},
-			{"Thanks @", "ditex2009 ruRU locales (horde) |nShooshpan ruRU locales (horde) |nmichaelselehov ruRU locales (alliance) |njerry99spkk zhTW locales (alliance) |nBNSSNB zhTW locales (alliance)|nananhaid zhCN locales (alliance & horde)|nand the nice community :)"}
+			{L["Thanks @"], "ditex2009 ruRU locales (horde) |nShooshpan ruRU locales (horde) |nmichaelselehov ruRU locales (alliance) |njerry99spkk zhTW locales (alliance) |nBNSSNB zhTW locales (alliance)|nananhaid zhCN locales (alliance & horde)|nand the nice community :)"}
 		};
 
 		for i,v in ipairs(descs) do
@@ -997,133 +964,146 @@ local function List_Search(self,bool)
 	List_Update();
 end
 
-local function List_ClassFilterClear(self)
-	self:GetParent().Text:SetText(ClassFilterLabel);
-	ClassFilter = "";
+local function List_FilterUpdate()
+	local self,last=FollowerLocationInfoFrame,0;
+	for i=1, NUM_FILTERS do
+		if (Filters[i]) then
+			self["Filter"..i].Text:SetText(Filters[i][3]);
+			self["Filter"..i]:Show();
+			self["Filter"..i].Remove:Show();
+			last=i;
+		elseif(i==(last+1)) then
+			self["Filter"..i].Text:SetText("");
+			self["Filter"..i]:Show();
+			self["Filter"..i].Remove:Hide();
+		else
+			self["Filter"..i].Text:SetText("");
+			self["Filter"..i]:Hide();
+			self["Filter"..i].Remove:Hide();
+		end
+	end
 	List_Update();
-	self:Hide();
 end
 
-local function List_AbilityFilterClear(self)
-	self:GetParent().Text:SetText(AbilityFilterLabel);
-	AbilityFilter = "";
-	List_Update();
-	self:Hide();
+local function List_FilterClear(self)
+	local new={};
+	for i,v in ipairs(Filters) do
+		if(i~=self:GetParent().key) then
+			tinsert(new,v);
+		end
+	end
+	Filters=new;
+	List_FilterUpdate();
 end
 
-local function List_ClassFilter(self)
+local function List_FilterSet(n,t,v,l)
+	Filters[n]={t,v,l};
+	List_FilterUpdate();
+end
+
+local function List_FilterMenu(self)
+	local Class1,Class2,Abs,Traits,Profs,Counters = {},{},{},{},{},{};
+	local entries,cMax,page,nFilter = {},20,1,self:GetParent().key;
+
 	local menu = {
-		{ label = "Choose", title = true },
+		{ label = L["Choose"], title = true },
 		{ separator = true },
 	};
 
-	local t={};
 	for i,v in pairsByKeys(classNames2) do
 		if (v) then
 			local colorStr = classes[v[2]:upper()].colorStr
-			if (type(colorStr)~="string") then colorStr="ffffff"; end -- mysteriously... i don't know why but it is unsave to get sometimes class colors from blizzards globals.
-			tinsert(t, {
+			if (type(colorStr)~="string") then colorStr="ffffff"; end
+			tinsert(Class1, {
 				label = ("|c%s%s|r (|cff%s%s|r/|cff%s%s|r)"):format(colorStr,v[1],(v[4]>0) and "00ff00" or "999999",v[4],"ffee00",v[3]),
-				func=function()
-					ClassFilter = i;
-					local f = FollowerLocationInfoFrame.ClassFilter; f.Text:SetText(v[1]);
-					f.Remove:Show();
-					List_Update();
-				end
+				func=function() List_FilterSet(nFilter,"class",i,v[1]); end
 			});
 		end
 	end
-	if (#t>0)then
-		tinsert(menu,{ label = "Classes", childs=t});
-	end
 
-	local t={};
 	for i,v in pairsByKeys(classNames1) do
 		if (v) then
-			tinsert(t,{
+			tinsert(Class2,{
 				label = ("|c%s%s|r (|cff%s%s|r/|cff%s%s|r)"):format(classes[v[2]:upper()].colorStr,v[1],(v[4]>0) and "00ff00" or "999999",v[4],"ffee00",v[3]),
-				func=function()
-					ClassFilter = v[1]:lower();
-					local f = FollowerLocationInfoFrame.ClassFilter;
-					f.Text:SetText(v[1]);
-					f.Remove:Show();
-					List_Update();
-				end
+				func=function() List_FilterSet(nFilter,"class",i,v[1]); end
 			});
 		end
 	end
-	if (#t>0)then
-		tinsert(menu,{ label = "Class speccs", childs=t});
-	end
 
-	if (#menu>2) then
-		createMenu(self,menu,"TOPLEFT","TOPRIGHT");
-	end
-end
-
-local function List_AbilityFilter(self)
-	local Abs,Traits,Counters = {},{},{};
-	local entries,cMax,page = {},20,1;
 	for i,v in pairsByKeys(abilityNames) do
 		if (v[2]) then
 			tinsert(Traits,{
 				label = ("%s (|cff%s%s|r/|cff%s%s|r)"):format(v[1],(v[4]>0) and "00ff00" or "999999",v[4],"ffee00",v[3]),
-				func = function()
-					AbilityFilter = v[1];
-					local f = FollowerLocationInfoFrame.AbilityFilter;
-					f.Text:SetText(v[1]);
-					f.Remove:Show();
-					List_Update();
-				end
+				func = function() List_FilterSet(nFilter,"ability",i,v[1]); end
 			});
 		else
 			if (Abs[page]==nil) then Abs[page]={}; end
 			tinsert(Abs[page],{
 				label = ("%s (|cff%s%s|r/|cff%s%s|r)"):format(v[1],(v[4]>0) and "00ff00" or "999999",v[4],"ffee00",v[3]),
-				func = function()
-					AbilityFilter = v[1];
-					local f = FollowerLocationInfoFrame.AbilityFilter;
-					f.Text:SetText(v[1]);
-					f.Remove:Show();
-					List_Update();
-				end
+				func = function() List_FilterSet(nFilter,"ability",i,v[1]); end
 			});
 			if (#Abs[page]==cMax) then
 				page = page+1;
 			end
 		end
 	end
+
 	for i,v in pairsByKeys(counterNames) do
 		tinsert(Counters,{
 			label = ("%s (|cff%s%s|r/|cff%s%s|r)"):format(v[1], (v[3]>0) and "00ff00" or "999999", v[3],"ffee00",v[2]),
-			func = function()
-				AbilityFilter = v[1];
-				local f = FollowerLocationInfoFrame.AbilityFilter;
-				f.Text:SetText(v[1]);
-				f.Remove:Show();
-				List_Update();
-			end
+			func = function() List_FilterSet(nFilter,"ability",i,v[1]); end
 		});
+			end
+
+	if (#Class1>0)then
+		tinsert(menu,{ label = L["Classes"], childs=Class1});
 	end
-	if (#Traits>0) or (#Abs>0) or (#Counters>0) then
-		local menu = {
-			{ label = L["Choose"], title = true },
-			{ separator = true },
-			
-		};
+	if (#Class2>0)then
+		tinsert(menu,{ label = L["Class speccs"], childs=Class2});
+	end
+
 		if (#Traits>0) then
 			tinsert(menu,{ label = L["Traits"], childs=Traits });
 		end
+
 		if (#Abs>0) then
 			for i,v in ipairs(Abs) do
 				tinsert(menu,{ label = L["Abilities (page %d)"]:format(i), childs=v });
 			end
 		end
+
 		if (#Counters>0) then
 			tinsert(menu,{ label = L["Counters"], childs=Counters });
 		end
 
+	if (#menu>2) then
 		createMenu(self,menu,"TOPLEFT","TOPRIGHT");
+	end
+end
+local function List_FilterInit(self)
+	local f;
+	for i=1, NUM_FILTERS do
+		if (not self["Filter"..i]) then
+			self["Filter"..i] = CreateFrame("Frame",nil,self,"FollowerLocationInfoFilterTemplate");
+			f=self["Filter"..i];
+			if (i==1) then
+				f:SetPoint("TOPLEFT",self.Search,"BOTTOMLEFT",0,-2)
+				f:SetPoint("TOPRIGHT",self.Search,"BOTTOMRIGHT",0,-2)
+			else
+				f:SetPoint("TOPLEFT",self["Filter"..(i-1)],"BOTTOMLEFT",0,-3)
+				f:SetPoint("TOPRIGHT",self["Filter"..(i-1)],"BOTTOMRIGHT",0,-3)
+			end
+			f.Title:SetText(L["Filter %d/%d"]:format(i,NUM_FILTERS));
+			f.Button:SetScript("OnClick", List_FilterMenu);
+			f.Remove:SetScript("OnClick", List_FilterClear);
+			f.key=i;
+		end
+		self["Filter"..i].Text:SetText("");
+		if (i==1) then
+			self["Filter"..i]:Show();
+		else
+			self["Filter"..i]:Hide();
+		end
 	end
 end
 
@@ -1152,29 +1132,33 @@ local function ListEntries_Update(clear)
 			end
 		end
 
-		-- filter 3: Select class filter
-		if (ClassFilter~="") and not ((v.className:lower()==ClassFilter) or (v.class==ClassFilter)) then
+		-- filter 3: 3 selectable filter options
+		if (#Filters>0) then
+			for _,filter in ipairs(Filters) do
+				if (type(filter)=="table") and (type(filter[2])=="string") and (strlen(filter[2])>0) then
+					if (filter[1]=="class") then
+						if not (v.className:lower()==filter[2] or v.class==filter[2]) then
 			ignore=true;
 		end
-
-		-- filter 4: Select traint filter
-		if (AbilityFilter~="") then
+					elseif (filter[1]=="ability") then
 			local dontIgnore,name,cname=false,false,false;
 			for _,V in ipairs(v.abilities) do
 				V=tostring(V);
 				name = C_Garrison.GetFollowerAbilityName(V);
 				local counter = {C_Garrison.GetFollowerAbilityCounterMechanicInfo(V)};
-				if (#counter~=0) then
-					cname = counter[2];
-				end
-				if (name) and (name==AbilityFilter) then
+							if (name) and (name==filter[2]) then
 					dontIgnore=true;
-				elseif (cname) and (cname==AbilityFilter) then
+							elseif (#counter~=0) and (counter[2]) and (counter[2]==filter[2]) then
 					dontIgnore=true;
 				end
 			end
 			if (not dontIgnore) then
 				ignore = true;
+						end
+					elseif (filter[1]=="misc") then
+						--[=[ ? ]=]
+					end
+				end
 			end
 		end
 
@@ -1410,24 +1394,10 @@ eventFrame:SetScript("OnEvent", function(self,event,arg1,...)
 		if (FollowerLocationInfoDB.ListOpen) then
 			FollowerLocationInfo_ToggleList(true);
 		end
-		if (FollowerLocationInfoDB.language) then
-			local change=false;
-			for i,v in pairs(ns.languages) do
-				if (FollowerLocationInfoDB.language==i) then
-					change=true;
-				elseif --[[ (not <exclude for later>) and ]] (FollowerLocationInfoDB.language:sub(1,2)==i:sub(1,2)) then
-					change=true
-				end
-			end
-			if (change) then
-				ns.language = FollowerLocationInfoDB.language;
-			end
+		if (UnitLevel("player")>=90) then
+			GetBlizzardData();
+			C_Timer.After(15,GetBlizzardData);
 		end
-		if (UnitLevel("player")>=90) and (not GarrisonLandingPage) then
-			Garrison_LoadUI();
-			C_Timer.After(30,GetBlizzardData);
-		end
-		onEvent=false;
 	end
 
 	if (event=="ADDON_LOADED" and arg1=="Blizzard_GarrisonUI") then
@@ -1437,13 +1407,11 @@ eventFrame:SetScript("OnEvent", function(self,event,arg1,...)
 
 		GarrisonMissionFrame.MissionTab:HookScript("OnHide", function()
 			updateLock=false;
-			eventFrame:GetScript("OnEvent")({},"GARRISON_FOLLOWER_LIST_UPDATE");
 		end);
 	end
 
-	if ((event=="ADDON_LOADED" and arg1=="Blizzard_GarrisonUI") or (event=="GARRISON_FOLLOWER_LIST_UPDATE")) then
+	if (event=="GARRISON_FOLLOWER_LIST_UPDATE") then
 		GetBlizzardData();
-		-- broker.update();
 	end
 end);
 eventFrame:RegisterEvent("ADDON_LOADED");
@@ -1494,14 +1462,57 @@ function FollowerLocationInfo_MinimapButton()
 	end
 end
 
-function FollowerLocationInfo_PrintMissingData()
-	local tmp;
-	for i,v in pairs(IsMissing) do
-		if (type(v)=="table") and (#v>0) then
-			table.sort(v);
-			print("|cffff4444FLI|r","|cffffff00"..i.."?|r", "|cff44aaff"..table.concat(v,"|r, |cff44aaff").."|r");
+function FollowerLocationInfo_PrintMissingData(bool)
+	local missing={npcs={},objs={},zones={},descs={}};
+
+	local _=function(followerID,desc)
+		if (not desc.zone) or (desc.zone==0) then
+			missing.zones[followerID]=true;
+		end
+		if (#desc==0) then
+			missing.descs[followerID]=true;
+		else
+			for index, data in ipairs(desc) do
+				if (data[1]=="quest" or data[1]=="questrow" or data[1]=="event") then
+					for i=2,#data do
+						if (type(data[i][2])=="number") and (data[i][2]>0) and (bool or not ns.npcs[data[i][2]]) then
+							missing.npcs[data[i][2]]=true;
+						elseif (type(data[i][2])=="string" and data[i][2]:find("^o")) and (bool or not ns.npcs[data[i][2]]) then
+							missing.objs[gsub(data[i][2],"o","")]=true;
+						end
+						if (type(data[i][8])=="number") and (data[i][8]>0) and (bool or not ns.npcs[data[i][8]]) then
+							missing.npcs[data[i][8]]=true;
+						elseif (type(data[i][8])=="string" and data[i][8]:find("^o")) and (bool or not ns.npcs[data[i][8]]) then
+							missing.objs[gsub(data[i][8],"o","")]=true;
+						end
+					end
+				elseif (data[1]=="vendor") then
+					for i=2,#data do
+						if (type(data[i][1])=="number") and (data[i][1]>0) and (bool or not ns.npcs[data[i][2]] ) then
+							missing.npcs[data[i][1]]=true;
+						end
+					end
+				end
+			end
 		end
 	end
+
+	for followerID,data in pairs(ns.followers) do
+		_(followerID,data[2] or {}); -- neutral or alliance data
+		if (data[1]==false) then
+			_(followerID,data[3] or {}); -- horde data
+		end
+	end
+
+	local x;
+	for i,v in pairs(missing) do
+		x={}; for k in pairs(v) do tinsert(x,k); end
+		if (#x>0) then
+			table.sort(x);
+			print("|cffff4444FLI|r","|cffffff00"..i.."?|r", "|cff44aaff"..table.concat(x,"|r, |cff44aaff").."|r");
+		end
+	end
+	collectgarbage("collect");
 end
 
 function FollowerLocationInfo_ToggleList(force)
@@ -1515,8 +1526,9 @@ function FollowerLocationInfo_ToggleList(force)
 		self.ListBG:Hide();
 		self.ListOptionBG:Hide()
 		self.Search:Hide();
-		self.ClassFilter:Hide();
-		self.AbilityFilter:Hide();
+		self.Filter1:Hide();
+		self.Filter2:Hide();
+		self.Filter3:Hide();
 		n:SetTexture(tx);
 		h:SetTexture(tx);
 		if (force==nil) then
@@ -1528,14 +1540,13 @@ function FollowerLocationInfo_ToggleList(force)
 		self.ListBG:Show();
 		self.ListOptionBG:Show()
 		self.Search:Show();
-		self.ClassFilter:Show();
-		self.AbilityFilter:Show();
 		n:SetTexture(tx);
 		h:SetTexture(tx);
 		if (force==nil) then
 			FollowerLocationInfoDB.ListOpen=true;
 		end
-		List_Update();
+		List_FilterUpdate();
+		--List_Update();
 	end
 end
 
@@ -1641,19 +1652,12 @@ function FollowerLocationInfoFrame_OnLoad(self)
 	self:SetUserPlaced(true);
 	self:SetFrameLevel(10);
 	self:SetScript("OnShow", FollowerLocationInfoFrame_OnShow);
-	function self:RegisterEvent() end
-	function self:UnregisterEvent() end
+	self.RegisterEvent = error;
+	self.UnregisterEvent = error;
 
 	-- FLI -- FilterElements
 	self.Search:SetScript("OnTextChanged", List_Search);
-	self.ClassFilter.Text:SetText(L[ClassFilterLabel]);
-	self.ClassFilter.Title:SetText(L["Filter 1"]);
-	self.ClassFilter.Button:SetScript("OnClick", List_ClassFilter);
-	self.ClassFilter.Remove:SetScript("OnClick", List_ClassFilterClear);
-	self.AbilityFilter.Text:SetText(L[AbilityFilterLabel]);
-	self.AbilityFilter.Title:SetText(L["Filter 2"]);
-	self.AbilityFilter.Button:SetScript("OnClick", List_AbilityFilter);
-	self.AbilityFilter.Remove:SetScript("OnClick", List_AbilityFilterClear);
+	List_FilterInit(self)
 
 	-- FLI.ListBG / FLI.ListOptionBG
 	self.ListBG:SetFrameLevel(self:GetFrameLevel()-2);
@@ -1722,7 +1726,7 @@ SlashCmdList["FOLLOWERLOCATIONINFO"] = function(cmd)
 		_print("  minimap = "    .. L["Show/Hide minimap button"]);
 		_print("  reset =    "   .. L["Reset addon settings"]);
 		--_print("  resetscale = " .. L["Reset window scaling"]);
-		_print("~ development commands ~");
+		_print(L["~ development commands ~"]);
 		--_print("  missing = "    .. L["Print missing data (follower and npc id's)"]);
 		_print("  collectlocales = "    .. L["Collects localized follower names from one faction. It is recommented to use it on both factions. The character must be level 90 or higher."]);
 		_print("  delcollectedlocales = "..L["Deletes collected localized follower names"]);
@@ -1733,16 +1737,4 @@ SLASH_FOLLOWERLOCATIONINFO1 = "/fli";
 SLASH_FOLLOWERLOCATIONINFO2 = "/followerlocationinfo";
 
 
---[[
-function x()
-	local _ = function(n,m)
-		for i,v in pairs(ns[n]) do
-			if (ns[m][n]) and (ns[m][n][i]) then
-				ns[n][i] = v;
-			end
-		end
-	end;
-	_("classspec_locales","cna")
-end
-]]
 

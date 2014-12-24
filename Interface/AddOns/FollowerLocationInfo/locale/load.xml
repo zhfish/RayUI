@@ -13,17 +13,6 @@
 	<Script file="_classspecs.lua" />
 	<Script file="_factions.lua" />
 	<Script file="_followers.lua" />
-	<!-- <Script file="_npcs.lua" /> for later use -->
-	<Script file="_zones.lua" />
-	<Script file="_npcs_old.lua" />
-
-	<!-- temp -->
-	<!--
-	<Script file="xru_alliance.lua" />
-	<Script file="xru_horde.lua" />
-	<Script file="xcn_Alliance.lua"/>
-	<Script file="xcn_Horde.lua"/>
-	<Script file="xtw_alliance.lua"/>
-	-->
+	<Script file="_npcs.lua" />
 
 </Ui>

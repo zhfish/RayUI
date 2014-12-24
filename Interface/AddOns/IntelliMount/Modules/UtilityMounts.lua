@@ -5,10 +5,9 @@
 -- 2014/10/21
 ------------------------------------------------------------
 
-local ipairs = ipairs
 local GetSpellInfo = GetSpellInfo
 local wipe = wipe
-local UnitBuff = UnitBuff
+local ipairs = ipairs
 local GetNumMounts = C_MountJournal.GetNumMounts
 local GetMountInfo = C_MountJournal.GetMountInfo
 
@@ -21,9 +20,17 @@ local utilityMounts = {
 	{ id = 60424, passenger = 1 },
 	{ id = 61425, passenger = 1, vendor = 1 },
 	{ id = 122708, passenger = 1, vendor = 1 },
-	{ id = 118089, water = 1 },
-	{ id = 127271, water = 1 },
+	{ id = 118089, surface = 1 },
+	{ id = 127271, surface = 1 },
+	{ id = 64731, underwater = 1 },
+	{ id = 30174, underwater = 1 },
+	{ id = 98718, underwater = 1 },
 }
+
+if addon:PlayerClass("WARLOCK") then
+	tinsert(utilityMounts, { id = 5784, surface = 1 })
+	tinsert(utilityMounts, { id = 23161, surface = 1 })
+end
 
 local LEARNED_MOUNTS = {}
 
@@ -32,6 +39,8 @@ do
 	for _, data in ipairs(utilityMounts) do
 		data.name, _, data.icon = GetSpellInfo(data.id)
 	end
+
+	sort(utilityMounts, function(a, b) return (a.name or "") < (b.name or "") end) -- Sort the table by mount names
 end
 
 function addon:UpdateUtilityMounts()
@@ -63,11 +72,14 @@ function addon:IsMountLearned(name)
 	return LEARNED_MOUNTS[name]
 end
 
-local ABYSSAL_SEAHORSE = GetSpellInfo(75207) -- Abyssal Seahorse
-local SEA_LEGS = GetSpellInfo(73701) -- The buff which determines whether the player is located in Vashj'ir
-
-function addon:GetAbyssalSeahorse()
-	if addon.db.seahorseFirst and IsUsableSpell(75207) and UnitBuff("player", SEA_LEGS) then
-		return ABYSSAL_SEAHORSE
+addon:RegisterEventCallback("OnInitialize", function(db)
+	-- Transfer old version data to new one
+	if addon.db.waterStrider then
+		addon.db.surfaceMount = addon.db.waterStrider
+		addon.db.waterStrider = nil
 	end
-end
+
+	if addon.db.surfaceMount and not addon.db.warlockSurfaceMount then
+		addon.db.warlockSurfaceMount = addon.db.surfaceMount
+	end
+end)

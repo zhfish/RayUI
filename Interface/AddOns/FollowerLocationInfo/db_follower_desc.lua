@@ -5,20 +5,20 @@ local desc = {
 	[32] = {
 		enUS = "Liberate him twice from captivity. Then return to your garrison and you'll find him outside the fortress walls.",
 		deDE = "Befreie ihn zweimal aus Gefangenschaft. Dann kehre zu deiner Garnison zurück und du wirst ihn ausserhalb der Festungsmauern finden.",
-		zhTW = "從囚禁中解放了他兩次。然後返回到您的要塞，你會發現他在堡壘城牆外。",
-		zhCN = "从囚禁中解放了他两次。然后返回到您的要塞，你会发现他在堡垒城墙外。",
+		zhTW = "從囚禁中解救他兩次。然後返回到您的要塞，你會發現他在堡壘城牆外。",
+		zhCN = "从囚禁中解救他两次。然后返回到您的要塞，你会发现他在堡垒城墙外。",
 	},
 	[171] = {
 		enUS = "After the quest, you get him as a quest reward. The charging process takes a while so you should not run away after completing the quest...",
 		deDE = "Nach der Quest bekommt man ihn als Belohnung. Der Ladevorgang dauert etwas, daher sollte man nach Abschluss des Quests nicht weglaufen...",
 		zhTW = "在此任務之後，您會得到他作為任務獎勵。裝載的過程需要一會兒，所以你不應該在完成任務後跑開...",
-		zhCN = "在此任务之后，您会得到他作为任务奖励。装载的过程需要一会儿，所以你不应该在完成任务后跑开...",
+		zhCN = "在此任务之后，您会得到他作为任务奖励。装载的过程需要一会儿，所以你不应该在完成任务后跑开…",
 	},
 	[195] = {
 		enUS = "Barov is located at a random position in Draenor under a felled tree. With the ability of the sawmill Barov you can free. Then he offers his following.",
 		deDE = "Barov liegt an einer zufälligen Position in Draenor unter einem gefällten Baum. Mit der Fähigkeit des Sägewerks kannst du Barov befreien. Danach bietet er seine Gefolgschaft an.",
 		zhTW = "巴羅夫位於在一個隨機的位置，在德拉諾一棵伐倒的樹之下。使用伐木的技能你可以解放巴羅夫。然後他會追隨你。",
-		zhCN = "巴罗夫位于在一个随机的位置，在德拉诺一棵伐倒的树之下。使用伐木的技能你可以解放巴罗夫。然后他会追随你。",
+		zhCN = "巴罗夫位于在一个随机的位置，在德拉诺一棵伐倒的树之下。使用伐木的技能你可以解救巴罗夫。然后他会追随你。",
 	}
 };
 
@@ -58,7 +58,6 @@ ns.followers = {
 		false,
 		{
 			zone = 946,
-			{"requirements", "塔拉多爾哨站選擇軍械庫"},
 			{"questrow",
 				{34563, 79160, 946, 69.2, 19.2},
 				{34571, 79159, 946, 69.2, 19.2},
@@ -74,13 +73,12 @@ ns.followers = {
 		},
 		{
 			zone = 946,
-			{"requirements", "塔拉多爾哨站選擇軍械庫"},
 			{"questrow",
 				{34972, 79356, 946, 70.8, 30.4},
 				{34837, 79356, 946, 70.8, 30.4},
 				{34840, 80229, 946, 62.0, 69.2},
 				{34855, 80339, 946, 68.6, 70.4},
-				{34870, 80341, 946, "出現在您的位置" },
+				{34870, 80341, 946, "Appears on your position" },
 				{34971, 80342, 946, 64.4, 81.6},
 				{34972, 80623, 946, 71.2, 29.8}
 			},
@@ -125,8 +123,8 @@ ns.followers = {
 			{"quest", {33973, 77031, 946, 56.7, 26}},
 			{"desc", {
 				enUS = "Gained after an optional quest started by Ahm in Archenon Siegeyard. On your next visit to your garrison, Ahm will be waiting for you near the graveyard. (Tritox/WoWHead)",
-				zhTW = "開始於阿克農陣地的阿哈姆一個選擇性任務完成後後獲得，在您下次訪問您的要塞時，阿哈姆會在墓地附近等候您。",
-				zhCN = "开始于阿克农阵地的阿哈姆一个选择性任务完成后后获得，在您下次访问您的要塞时，阿哈姆会在墓地附近等候您。",
+				zhTW = "開始於阿克農陣地的阿哈姆其中一個任務完成後後獲得，在您下次訪問您的要塞時，阿哈姆會在墓地附近等候您。",
+				zhCN = "开始于奥金诺攻城营地的阿姆其中一个任务完成后后获得，在您下次访问您的要塞时，阿姆会在墓地附近等候您。",
 			}}
 		}
 	},
@@ -145,8 +143,8 @@ ns.followers = {
 			{"desc", {
 				enUS = "Found the four mysterious items and bring it to Zooti Fizzlefury for the ritual.",
 				deDE = "Finde die vier mysteriösen Gegenstände und bringe sie zu Zooti Zappenduster für das Ritual.",
-				zhTW = "發現四個神秘的物品，並把它交給祖提.嘶怒進行召喚儀式。",
-				zhCN = "发现四个神秘的物品，并把它交给祖提.嘶怒进行召唤仪式。",
+				zhTW = "發現四個神秘的物品，並把它交給祖提.嘶怒用作進行祈福儀式。",
+				zhCN = "发现四个神秘的物品，并把它交给佐提·轮怒用作进行祈福仪式。",
 			}},
 		}
 	},
@@ -341,25 +339,20 @@ ns.followers = {
 		false,
 		{
 			zone = 948,
-			{"requirements", "阿拉卡哨站選擇走私者巢穴"},
-			{"pos", {948, nil, nil, "召喚走私商人有機會購買"}},
 		},
 		{
 			zone = 948,
-			{"requirements", "阿拉卡哨站選擇走私者巢穴"},
-			{"pos", {948, nil, nil, "召喚走私商人有機會購買"}},
 		}
 	}, --- incomplete
 	[219] = { -- 948, 219,Leorajh
 		true,
 		{
 			zone = 948,
-			{"pos", {948, 55.3, 68.5, "在圖片1的洞穴"}, {948, 55, 65.2, "隱藏的洞穴"}},
+			{"pos", {948, 55.3, 68.5, "Cave on image 1"}, {948, 55, 65.2, "Hidden cave"}},
 			{"desc", {
 				enUS = "Find Leorajh's cave at the foot of the mountain. Climb up to the hidden cave and rescue Leorajh.",
 				deDE = "Finde Leorajh's Höhle am Fuße des Berges. Steige auf zur versteckten Höhle und rette Leorajh.",
-				zhTW = "找到在雷歐拉傑山腳下的洞穴。爬上那隱密的山洞並解救雷歐拉傑。",
-				zhCN = "找到在利奥拉山脚下的洞穴。爬上那隐密的山洞并解救利奥拉。",
+				zhCN = "在山脚下发现利奥拉的洞穴。爬上去到隐藏的洞穴解救利奥拉。",
 			}},
 			{"img", "1", "2", "3"},
 		}
@@ -492,8 +485,7 @@ ns.followers = {
 			zone = 971,
 			{"desc", {
 				enUS = "Follow the quest row starting with \"Ashran Appearance\" and at the end Delvar Ironfist will offer its following",
-				zhTW = "隨著\"艾斯蘭一覽\"的任務串解下去到最後，德爾瓦.鐵拳將會成為您的追隨者。",
-				zhCN = "随着\"艾斯兰一览\"的任务串解下去到最后，德尔瓦.铁拳将会成为您的追随者。",
+				zhCN = "追寻由“阿什兰一览”开始的任务线并在最后德尔瓦·铁拳将成为你的追随者",
 			}},
 			{"questrow",
 				{36624, 79953, 971, 40.6, 53.6},
@@ -507,8 +499,7 @@ ns.followers = {
 			zone = 941,
 			{"desc", {
 				enUS = "Follow the quest row starting with \"Ashran Appearance\" and at the end Vivianne will offer his following",
-				zhTW = "隨著\"艾斯蘭一覽\"的任務串解下去到最後，薇薇安妮將會成為您的追隨者。",
-				zhCN = "随着\"艾斯兰一览\"的任务串解下去到最后，薇薇安妮将会成为您的追随者。",
+				zhCN = "追寻由“阿什兰一览”开始的任务线并在最后薇薇安将成为你的追随者",
 			}},
 			{"questrow", 
 				{36706, 78466, 976, 52.4, 52.8},
@@ -596,8 +587,8 @@ ns.followers = {
 			{"desc", {
 				enUS = "In cases of trees being attacked by him. He disappears with little life. This is a few times until he surrenders.",
 				deDE = "Beim fällen von Bäumen wird man von ihm angegriffen. Er verschwindet mit wenig Leben. Das geht ein paar mal so bis er sich ergibt.",
-				zhTW = "在砍完樹的情況下開始攻擊。他只剩一點血時會消失。持續好幾次，直到他投降。",
-				zhCN = "在砍完树的情况下开始攻击。他只剩一点血时会消失。持续好几次，直到他投降。",
+				zhTW = "在被他被追趕的情況下開始攻擊。他只剩一點血時會消失。持續好幾次，直到他投降。",
+				zhCN = "在被他被追赶的情况下开始攻击。他只剩一点血时会消失。持续好几次，直到他投降。",
 			}}
 		}
 	},
@@ -684,7 +675,7 @@ ns.followers = {
 		true,
 		{
 			zone=949,
-			{"pos", {949, 42.8, 90.9, "布魯克的開始位置"}},
+			{"pos", {949, 42.8, 90.9, "Beginning of the path to blook"}},
 			{"quest", {34279, 78030, 949, 41.2, 91.4}},
 		}
 	}, --- add screenshots
@@ -696,8 +687,8 @@ ns.followers = {
 			{"desc", {
 				enUS = "Help him to defend himself. Then he is friendly and can be recruited.",
 				deDE = "Helft ihm sich zu verteidigen. Danach wird er freundlich und kann rekrutiert werden.",
-				zhTW = "幫助他抵檔攻擊並保護他，然後才會是友好狀態，并且可以被招募。",
-				zhCN = "帮助他抵档攻击并保护他，然后才会是友好状态，并且可以被招募。",
+				zhTW = "幫助他與保護他，然後他會是友好的，并且可以被招募。",
+				zhCN = "帮助并保护他，然后他会是友好的，并且可以被招募。",
 			}}
 		}
 	}, --- add screenshots
@@ -750,11 +741,12 @@ ns.followers = {
 				{35061, 81086, 950, 55.4, 42.2},
 				{34596, 81144, 950, 84, 76.8},
 				{34957, 80319, 950, 89.8, 55.8},
+				{35062, 81039, 950, 62, 40.4},
+				{35169, 79576, 950, 63.6, 61.8},
 			},
 			{"desc", {
-				enUS = "You can find Lantresort after completing the quest line near the outpost.",
+				enUS = "You can find Lantresor after completing the quest line near the outpost.",
 				deDE = "Du findest Lantresor nach Abschluss der Questreihe in der Nähe des Außenpostens.",
-				zhTW = "您可以在完成任務線後在哨站外側的樹下找到蘭崔索，對話後成為追隨者。",
 				zhCN = "您可以在完成任务线后在岗哨找到兰特瑞索。",
 			}}
 		},
@@ -771,8 +763,7 @@ ns.followers = {
 			{"desc", {
 				enUS = "Kill Bolkar the Cruel and loot the key for Goldmane's cage. Than open the cage and Goldmane will offer you his following.",
 				deDE = "Töte 'Bolkar der Grausame' und erbeute den Schlüssel zu Goldmähne's Käfig. Dann öffne den Käfig und Goldmähne wird seine Gefolgschaft anbieten.",
-				zhTW = "殺了殘酷的布洛卡然後撿取金毛牢籠的鑰匙。然後開啟牢籠金毛將會成為您的追隨者。",
-				zhCN = "杀了残酷的布洛卡尔然后捡取金毛牢笼的钥匙。然后开启牢笼金毛将会成为您的追随者。",
+				zhCN = "杀死残酷的波洛卡拾取金鬃的牢笼钥匙。并打开牢笼金鬃将成为你的追随者。",
 			}}
 		}
 	},
@@ -781,15 +772,14 @@ ns.followers = {
 		{
 			zone=950,
 			{"pos",
-				{950, 38.3, 49.4, "阿布加爾最愛的魚餌"},
-				{950, 65.8, 61.1, "阿布加爾的活力"},
-				{950, 85.4, 38.7, "阿布加爾的精緻線輪"},
-				{950, 67.2, 56, "阿布加爾本人"},
+				{950, 38.3, 49.4, "Abu'Gar's Favorite Lure"},
+				{950, 65.8, 61.1, "Abu'Gar's Vitality"},
+				{950, 85.4, 38.7, "Abu'Gar's Finest Reel"},
+				{950, 67.2, 56, "Abu'gar himself"},
 			},
 			{"desc", {
 				enUS = "Collect Abu'Gar's fishing equipment and bring it him",
 				deDE = "Sammel Abu'gars Angelausrüstung und bringe sie ihm",
-				zhTW = "收集阿布加爾的三個釣魚裝備並且帶給他。",
 				zhCN = "收集阿布加尔钓鱼装备并带给他",
 			}}
 		},

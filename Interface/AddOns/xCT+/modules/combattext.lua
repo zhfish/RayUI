@@ -107,8 +107,8 @@ function x:UpdateCombatTextEvents(enable)
     f:RegisterEvent("COMBAT_TEXT_UPDATE")
     f:RegisterEvent("UNIT_HEALTH")
     f:RegisterEvent("UNIT_POWER")
-    -- f:RegisterEvent("PLAYER_REGEN_DISABLED")
-    -- f:RegisterEvent("PLAYER_REGEN_ENABLED")
+    f:RegisterEvent("PLAYER_REGEN_DISABLED")
+    f:RegisterEvent("PLAYER_REGEN_ENABLED")
     f:RegisterEvent("UNIT_ENTERED_VEHICLE")
     f:RegisterEvent("UNIT_EXITING_VEHICLE")
     f:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -153,6 +153,8 @@ local function ShowCombatState() return COMBAT_TEXT_SHOW_COMBAT_STATE == "1" end
 local function ShowFriendlyNames() return COMBAT_TEXT_SHOW_FRIENDLY_NAMES == "1" end
 local function ShowColoredFriendlyNames() return x.db.profile.frames["healing"].enableClassNames end
 local function ShowHealingRealmNames() return x.db.profile.frames["healing"].enableRealmNames end
+local function ShowOnlyMyHeals() return x.db.profile.frames.healing.showOnlyMyHeals end
+local function ShowOnlyMyPetsHeals() return x.db.profile.frames.healing.showOnlyPetHeals end
 local function ShowDamage() return x.db.profile.frames["outgoing"].enableOutDmg end
 local function ShowHealing() return x.db.profile.frames["outgoing"].enableOutHeal end
 local function ShowPetDamage() return x.db.profile.frames["outgoing"].enablePetDmg end
@@ -291,34 +293,37 @@ end
  String Formatters
 --]=====================================================]
 local format_loot = "([^|]*)|cff(%x*)|H([^:]*):(%d+):%d+:(%d+):[-?%d+:]+|h%[?([^%]]*)%]|h|r?%s?x?(%d*)%.?"
+local format_pet  = sformat("|cff798BDD[%s]:|r %%s (%%s)", sgsub(BATTLE_PET_CAGE_ITEM_NAME,"%s?%%s","")) -- [Caged]: Pet Name (Pet Family)
+
+-- Debug Output
 --local msg = "|cff1eff00|Hitem:108840:0:0:0:0:0:0:443688319:90:0:0:0|h[Warlords Intro Zone PH Mail Helm]|h|r"
 --local format_loot = "([^|]*)|cff(%x*)|H([^:]*):(%d+):[-?%d+:]+|h%[?([^%]]*)%]|h|r?%s?x?(%d*)%.?"
 
-local format_pet  = sformat("|cff798BDD[%s]:|r %%s (%%s)", sgsub(BATTLE_PET_CAGE_ITEM_NAME,"%%s","")) -- [Caged]: Pet Name (Pet Family)
+local format_fade               = "-%s"
+local format_gain               = "+%s"
+local format_gain_rune          = "%s +%s %s"
+local format_resist             = "-%s (%s %s)"
+local format_energy             = "+%s %s"
+local format_honor              = sgsub(COMBAT_TEXT_HONOR_GAINED, "%%s", "+%%s")
+local format_faction_add        = "%s +%s"
+local format_faction_sub        = "%s %s"
+local format_crit               = "%s%s%s"
+local format_dispell            = "%s: %s"
+local format_quality            = "ITEM_QUALITY%s_DESC"
+local format_remove_realm       = "(.*)-.*"
 
-local format_fade         = "-%s"
-local format_gain         = "+%s"
-local format_gain_rune    = "%s +%s %s"
-local format_resist       = "-%s (%s %s)"
-local format_energy       = "+%s %s"
-local format_honor        = sgsub(COMBAT_TEXT_HONOR_GAINED, "%%s", "+%%s")
-local format_faction_add  = "%s +%s"
-local format_faction_sub  = "%s %s"
-local format_crit         = "%s%s%s"
-local format_dispell      = "%s: %s"
-local format_quality      = "ITEM_QUALITY%s_DESC"
-local format_remove_realm = "(.*)-.*"
-
-local format_spell_icon   = " |T%s:%d:%d:0:0:64:64:5:59:5:59|t"
-local format_msspell_icon = " |cffFFFFFFx%d|r |T%s:%d:%d:0:0:64:64:5:59:5:59|t"
-local format_loot_icon    = "|T%s:%d:%d:0:0:64:64:5:59:5:59|t"
-local format_lewtz        = "%s%s: %s [%s]%s%%s"
-local format_lewtz_amount = " |cff798BDDx%s|r"
-local format_lewtz_total  = " |cffFFFF00(%s)|r"
-local format_lewtz_blind  = "(%s)"
-local format_crafted      = (LOOT_ITEM_CREATED_SELF:gsub("%%.*", ""))
-local format_looted       = (LOOT_ITEM_SELF:gsub("%%.*", ""))
-local format_pushed       = (LOOT_ITEM_PUSHED_SELF:gsub("%%.*", ""))
+local format_spell_icon         = " |T%s:%d:%d:0:0:64:64:5:59:5:59|t"
+local format_msspell_icon_right = "%s |cff%sx%d|r |T%s:%d:%d:0:0:64:64:5:59:5:59|t"
+local format_msspell_icon_left  = " |T%s:%d:%d:0:0:64:64:5:59:5:59|t %s |cff%sx%d|r"
+local format_loot_icon          = "|T%s:%d:%d:0:0:64:64:5:59:5:59|t"
+local format_lewtz              = "%s%s: %s [%s]%s%%s"
+local format_lewtz_amount       = " |cff798BDDx%s|r"
+local format_lewtz_total        = " |cffFFFF00(%s)|r"
+local format_lewtz_blind        = "(%s)"
+local format_crafted            = (LOOT_ITEM_CREATED_SELF:gsub("%%.*", ""))
+local format_looted             = (LOOT_ITEM_SELF:gsub("%%.*", ""))
+local format_pushed             = (LOOT_ITEM_PUSHED_SELF:gsub("%%.*", ""))
+local format_strcolol_white     = "ffffff"
 
 --[=====================================================[
  Message Formatters
@@ -339,14 +344,11 @@ function xCTFormat:SPELL_HEAL( multistriked, outputFrame, spellID, amount, criti
   end
 
   -- Add Icons
-  if x.db.profile.frames[outputFrame].iconsEnabled then
-    local iconsSize = x.db.profile.frames[outputFrame].iconsSize
-    if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-      message = x:GetSpellTextureFormatted(spellID, iconsSize, multistriked) .. "  " .. message
-    else
-      message = message .. x:GetSpellTextureFormatted(spellID, iconsSize, multistriked)
-    end
-  end
+  message = x:GetSpellTextureFormatted( spellID,
+                                        message,
+                                        multistriked,
+       x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+       x.db.profile.frames[outputFrame].fontJustify )
   
   x:AddMessage(outputFrame, message, outputColor)
 end
@@ -364,14 +366,11 @@ function xCTFormat:SPELL_PERIODIC_HEAL( multistriked, outputFrame, spellID, amou
   end
 
   -- Add Icons
-  if x.db.profile.frames[outputFrame].iconsEnabled then
-    local iconsSize = x.db.profile.frames[outputFrame].iconsSize
-    if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-      message = x:GetSpellTextureFormatted(spellID, iconsSize, multistriked) .. "  " .. message
-    else
-      message = message .. x:GetSpellTextureFormatted(spellID, iconsSize, multistriked)
-    end
-  end
+  message = x:GetSpellTextureFormatted( spellID,
+                                        message,
+                                        multistriked,
+       x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+       x.db.profile.frames[outputFrame].fontJustify )
   
   x:AddMessage(outputFrame, message, outputColor)
 end
@@ -391,19 +390,17 @@ function xCTFormat:SWING_DAMAGE( multistriked, outputFrame, spellID, amount, cri
     message = x:Abbreviate(amount, "outgoing")
   end
 
-  if x.db.profile.frames[outputFrame].iconsEnabled then
-    local iconsSize = x.db.profile.frames[outputFrame].iconsSize
-    if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-      message = x:GetSpellTextureFormatted(spellID, iconsSize, multistriked) .. "  " .. message
-    else
-      message = message .. x:GetSpellTextureFormatted(spellID, iconsSize, multistriked)
-    end
-  end
+  -- Add Icons
+  message = x:GetSpellTextureFormatted( spellID,
+                                        message,
+                                        multistriked,
+       x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+       x.db.profile.frames[outputFrame].fontJustify )
 
   x:AddMessage(outputFrame, message, outputColor)
 end
 
-function xCTFormat:RANGE_DAMAGE( multistriked, outputFrame, spellID, amount, critical, merged )
+function xCTFormat:RANGE_DAMAGE( multistriked, outputFrame, spellID, amount, critical, merged, autoShot )
   local outputColor, message = "genericDamage"
 
   if critical then
@@ -420,14 +417,11 @@ function xCTFormat:RANGE_DAMAGE( multistriked, outputFrame, spellID, amount, cri
   end
 
   -- Add Icons
-  if x.db.profile.frames[outputFrame].iconsEnabled then
-    local iconsSize = x.db.profile.frames[outputFrame].iconsSize
-    if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-      message = x:GetSpellTextureFormatted(spellID, iconsSize, multistriked) .. "  " .. message
-    else
-      message = message .. x:GetSpellTextureFormatted(spellID, iconsSize, multistriked)
-    end
-  end
+  message = x:GetSpellTextureFormatted( spellID,
+                                        message,
+                                        multistriked,
+       x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+       x.db.profile.frames[outputFrame].fontJustify )
 
   x:AddMessage(outputFrame, message, outputColor)
 end
@@ -443,16 +437,13 @@ function xCTFormat:SPELL_DAMAGE( multistriked, outputFrame, spellID, amount, cri
   else
     message = x:Abbreviate( amount, outputFrame )
   end
-
+  
   -- Add Icons
-  if x.db.profile.frames[outputFrame].iconsEnabled then
-    local iconsSize = x.db.profile.frames[outputFrame].iconsSize
-    if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-      message = x:GetSpellTextureFormatted(spellID, iconsSize, multistriked) .. "  " .. message
-    else
-      message = message .. x:GetSpellTextureFormatted(spellID, iconsSize, multistriked)
-    end
-  end
+  message = x:GetSpellTextureFormatted( spellID,
+                                        message,
+                                        multistriked,
+       x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+       x.db.profile.frames[outputFrame].fontJustify )
   
   x:AddMessage(outputFrame, message, GetCustomSpellColorFromIndex(spellSchool) )
 end
@@ -470,14 +461,11 @@ function xCTFormat:SPELL_PERIODIC_DAMAGE( multistriked, outputFrame, spellID, am
   end
 
   -- Add Icons
-  if x.db.profile.frames[outputFrame].iconsEnabled then
-    local iconsSize = x.db.profile.frames[outputFrame].iconsSize
-    if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-      message = x:GetSpellTextureFormatted(spellID, iconsSize, multistriked) .. "  " .. message
-    else
-      message = message .. x:GetSpellTextureFormatted(spellID, iconsSize, multistriked)
-    end
-  end
+  message = x:GetSpellTextureFormatted( spellID,
+                                        message,
+                                        multistriked,
+       x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+       x.db.profile.frames[outputFrame].fontJustify )
 
   x:AddMessage(outputFrame, message, GetCustomSpellColorFromIndex(spellSchool) )
 end
@@ -543,48 +531,85 @@ end
     Formats an icon quickly for use when outputing to
   a combat text frame.
 --]=====================================================]
-function x:GetSpellTextureFormatted(spellID, iconSize, multistrike)
+function x:GetSpellTextureFormatted( spellID, message, multistrike, iconSize, justify, strColor, mergeOverride )
   if not multistrike then multistrike = 0 end
-  local message, icon = "", x.BLANK_ICON
-
+  local icon = x.BLANK_ICON
+  strColor = strColor or format_strcolol_white
   if spellID == 0 then
-    --message = sformat(format_spell_icon, PET_ATTACK_TEXTURE, iconSize, iconSize)
     icon = PET_ATTACK_TEXTURE
   else
-    --local icon = GetSpellTexture(spellID) or x.BLANK_ICON
-    icon = GetSpellTexture(spellID) or x.BLANK_ICON
-    
-    --[[if icon then
-      message = sformat(format_spell_icon, icon, iconSize, iconSize)
-    else
-      message = sformat(format_spell_icon, x.BLANK_ICON, iconSize, iconSize)
-    end]]
+    icon = GetSpellTexture( spellID ) or x.BLANK_ICON
   end
 
-  if IsMultistrikeEnabled() then
-    if ShowMultistrikeIcons() then
-      -- TODO: Optimize this please
+  if iconSize < 1 then
+    icon = x.BLANK_ICON
+  end
+  
+  if mergeOverride or IsMultistrikeEnabled() then
+    if IsMultistrikeEnabled() and ShowMultistrikeIcons() and iconSize > 0 then
       local msIconSize = iconSize * GetMultistrikeIconMultiplier()
-      message = sformat( "%s%s%s",
-        sformat( format_spell_icon, icon, iconSize, iconSize ),
-        sformat( format_spell_icon, multistrike >= 1 and icon or x.BLANK_ICON, msIconSize, msIconSize ),
-        sformat( format_spell_icon, multistrike >= 2 and icon or x.BLANK_ICON, msIconSize, msIconSize )
-      )
+      if justify == "LEFT" then
+        if mergeOverride then
+          message = sformat( "%s%s%s %s%s",
+            sformat( format_spell_icon, x.BLANK_ICON, msIconSize, msIconSize ),
+            sformat( format_spell_icon, x.BLANK_ICON, msIconSize, msIconSize ),
+            sformat( format_spell_icon, icon, iconSize, iconSize ),
+            message, multistrike > 1 and ( sformat( " |cff%sx%d|r", strColor, multistrike ) ) or ""
+          )
+        else
+          message = sformat( "%s%s%s %s",
+            sformat( format_spell_icon, multistrike >= 2 and icon or x.BLANK_ICON, msIconSize, msIconSize ),
+            sformat( format_spell_icon, multistrike >= 1 and icon or x.BLANK_ICON, msIconSize, msIconSize ),
+            sformat( format_spell_icon, icon, iconSize, iconSize ), message
+          )
+        end
+      else
+        if mergeOverride then
+          message = sformat( "%s%s%s%s%s",
+            message, multistrike > 1 and ( sformat( " |cff%sx%d|r", strColor, multistrike ) ) or "",
+            sformat( format_spell_icon, icon, iconSize, iconSize ),
+            sformat( format_spell_icon, x.BLANK_ICON, msIconSize, msIconSize ),
+            sformat( format_spell_icon, x.BLANK_ICON, msIconSize, msIconSize )
+          )
+        else
+          message = sformat( "%s%s%s%s",
+            message, sformat( format_spell_icon, icon, iconSize, iconSize ),
+            sformat( format_spell_icon, multistrike >= 1 and icon or x.BLANK_ICON, msIconSize, msIconSize ),
+            sformat( format_spell_icon, multistrike >= 2 and icon or x.BLANK_ICON, msIconSize, msIconSize )
+          )
+        end
+      end
+      
     elseif multistrike > 0 then
-      message = sformat( format_msspell_icon, multistrike+1, icon, iconSize, iconSize )
+      if justify == "LEFT" then
+        message = sformat( format_msspell_icon_left, icon, iconSize, iconSize, message, strColor, multistrike+1 )
+      else
+        message = sformat( format_msspell_icon_right, message, strColor, multistrike+1, icon, iconSize, iconSize )
+      end
+      
     else
-      message = sformat( format_spell_icon, icon, iconSize, iconSize )
+      if justify == "LEFT" then
+        message = sformat( "%s %s", sformat( format_spell_icon, icon, iconSize, iconSize ), message )
+      else
+        message = sformat( "%s%s", message, sformat( format_spell_icon, icon, iconSize, iconSize ) )
+      end
     end
   else
-      message = sformat( format_spell_icon, icon, iconSize, iconSize )
+    if justify == "LEFT" then
+      message = sformat( "%s %s", sformat( format_spell_icon, icon, iconSize, iconSize ), message )
+    else
+      message = sformat( "%s%s", message, sformat( format_spell_icon, icon, iconSize, iconSize ) )
+    end
   end
   
   if x.db.profile.spells.enableMergerDebug then
     message = message .. " |cffFFFFFF[|cffFF0000ID:|r|cffFFFF00" .. spellID .. "|r]|r"
   end
-  
+
   return message
 end
+
+
 
 --[=====================================================[
  Multistrike Spam Manager :D "So shiny"
@@ -623,7 +648,7 @@ function x:EnqueueMultistrikeSpell( spellType, outputFrame, spellID, amount, ...
 end
 
 local lastAutoUpdate = 0
-local msMaxWait, msPreviousMax = 0, 0
+local msMaxWait, msPreviousMax, msMissed = 0, 0, 0
 function x:MultistrikeSpellEvent( spellID, amount )
   if #msQueue == 0 then return end
   local entry
@@ -662,7 +687,7 @@ function x:MultistrikeSpellEvent( spellID, amount )
           
         end
 
-        -- 100ms decay every 20 iterations
+        -- 100ms decay every 4 successful hits
         msMaxWait = msMaxWait - 100
       end
     end
@@ -678,8 +703,19 @@ function x:MultistrikeSpellEvent( spellID, amount )
             local time = mfloor( (GetTime() - msDebug[i].t) * 1000)
             msDebug[i].t = GetTime()
             lastAutoUpdate = 0
-            if IS_MULTISTRIKE_DEBUG() then print("Adjusting Latency up to |cffFF0000"..(time + 50)) end
-            x.db.profile.spells.multistrikeLatency = time + 50 -- Add 50 ms on top of what the multistrike was
+            msMissed = msMissed + 1
+            
+            if msMissed > 3 then
+              if (time + 50) > 3000 then
+                print("|cffFFFF00xCT+|r: Latency threshold reached (over |cffFF00003000ms|r)! Disabling |cff798BDDMultistrike Spam Merger|r.")
+                x.db.profile.spells.multistrikeLatency = 300
+                x.db.profile.spells.multistrikeEnabled = false
+              else
+                if IS_MULTISTRIKE_DEBUG() then print("Adjusting Latency up to |cffFF0000"..(time + 50)) end
+                x.db.profile.spells.multistrikeLatency = (time + 50)
+              end
+            end
+            
             return
           end
         end
@@ -713,6 +749,8 @@ function x:CleanupMultistrikeQueue( )
     if entry.timestamp + GetMSLatency() <= current then
       tremove(msQueue, i)
       
+      if msMissed > 0 then msMissed = msMissed - 1 end
+      
       -- OUTPUT the ENTRY
       if entry.spellType == "SPELL_HEAL" then
         xCTFormat:SPELL_HEAL( entry.ms, entry.outputFrame, entry.spellID, entry.amount, entry.params[1], entry.params[2] )
@@ -721,20 +759,18 @@ function x:CleanupMultistrikeQueue( )
         xCTFormat:SPELL_PERIODIC_HEAL( entry.ms, entry.outputFrame, entry.spellID, entry.amount, entry.params[1], entry.params[2] )
         
       elseif entry.spellType == "SPELL_DAMAGE" then
-        xCTFormat:SPELL_DAMAGE( entry.ms, entry.outputFrame, entry.spellID, entry.amount, entry.params[1], entry.params[2] )
+        xCTFormat:SPELL_DAMAGE( entry.ms, entry.outputFrame, entry.spellID, entry.amount, entry.params[1], entry.params[2], entry.params[3] )
       
       elseif entry.spellType == "SPELL_PERIODIC_DAMAGE" then
-        xCTFormat:SPELL_PERIODIC_DAMAGE( entry.ms, entry.outputFrame, entry.spellID, entry.amount, entry.params[1], entry.params[2] )
+        xCTFormat:SPELL_PERIODIC_DAMAGE( entry.ms, entry.outputFrame, entry.spellID, entry.amount, entry.params[1], entry.params[2], entry.params[3] )
       
       elseif entry.spellType == "SWING_DAMAGE" then
         xCTFormat:SWING_DAMAGE( entry.ms, entry.outputFrame, entry.spellID, entry.amount, entry.params[1], entry.params[2] )
         
       elseif entry.spellType == "RANGE_DAMAGE" then
-        xCTFormat:RANGE_DAMAGE( entry.ms, entry.outputFrame, entry.spellID, entry.amount, entry.params[1], entry.params[2] )
+        xCTFormat:RANGE_DAMAGE( entry.ms, entry.outputFrame, entry.spellID, entry.amount, entry.params[1], entry.params[2], entry.params[3] )
       
       end
-      
-      
       
       tdel( entry.params )
       tdel( entry )
@@ -925,6 +961,14 @@ x.combat_events = {
   ["ABSORB_ADDED"] = function(healer_name, amount)
       local message = sformat(format_gain, x:Abbreviate(amount,"healing"))
       
+      if ShowOnlyMyHeals() and healer_name ~= x.player.name then 
+        if ShowOnlyMyPetsHeals() and healer_name == UnitName("pet") then 
+          -- If its the pet, then continue
+        else
+          return
+        end
+      end
+      
       if not ShowHealingRealmNames() then
         healer_name = smatch(healer_name, format_remove_realm) or healer_name
       end
@@ -950,6 +994,14 @@ x.combat_events = {
     end,
   ["HEAL"] = function(healer_name, amount)
       if FilterIncomingHealing(amount) then return end
+  
+      if ShowOnlyMyHeals() and healer_name ~= x.player.name then 
+        if ShowOnlyMyPetsHeals() and healer_name == UnitName("pet") then 
+          -- If its the pet, then continue
+        else
+          return
+        end
+      end
   
       local message = sformat(format_gain, x:Abbreviate(amount,"healing"))
       
@@ -980,6 +1032,14 @@ x.combat_events = {
   ["HEAL_CRIT"] = function(healer_name, amount)
       if FilterIncomingHealing(amount) then return end
       
+      if ShowOnlyMyHeals() and healer_name ~= x.player.name then 
+        if ShowOnlyMyPetsHeals() and healer_name == UnitName("pet") then 
+          -- If its the pet, then continue
+        else
+          return
+        end
+      end
+      
       local message = sformat(format_gain, x:Abbreviate(amount,"healing"))
       
       if not ShowHealingRealmNames() then
@@ -1008,6 +1068,14 @@ x.combat_events = {
     end,
   ["PERIODIC_HEAL"] = function(healer_name, amount)
       if FilterIncomingHealing(amount) then return end
+      
+      if ShowOnlyMyHeals() and healer_name ~= x.player.name then 
+        if ShowOnlyMyPetsHeals() and healer_name == UnitName("pet") then 
+          -- If its the pet, then continue
+        else
+          return
+        end
+      end
       
       local message = sformat(format_gain, x:Abbreviate(amount,"healing"))
       
@@ -1038,6 +1106,14 @@ x.combat_events = {
     end,
   ["PERIODIC_HEAL_CRIT"] = function(healer_name, amount)
       if FilterIncomingHealing(amount) then return end
+      
+      if ShowOnlyMyHeals() and healer_name ~= x.player.name then 
+        if ShowOnlyMyPetsHeals() and healer_name == UnitName("pet") then 
+          -- If its the pet, then continue
+        else
+          return
+        end
+      end
       
       local message = sformat(format_gain, x:Abbreviate(amount,"healing"))
       
@@ -1110,7 +1186,7 @@ x.combat_events = {
   ["RESIST"] = function(amount, resisted)
       if resisted then
         if ShowResistances() then
-          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), RESIST, x:Abbreviate(resisted,"damage")), "resist_generic")
+          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), RESIST, x:Abbreviate(resisted,"damage")), "missTypeResistPartial")
         else
           x:AddMessage("damage", x:Abbreviate(amount,"damage"), "damage")
         end
@@ -1121,7 +1197,7 @@ x.combat_events = {
   ["BLOCK"] = function(amount, resisted)
       if resisted then
         if ShowResistances() then
-          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), BLOCK, x:Abbreviate(resisted,"damage")), "resist_generic")
+          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), BLOCK, x:Abbreviate(resisted,"damage")), "missTypeBlockPartial")
         else
           x:AddMessage("damage", x:Abbreviate(amount,"damage"), "damage")
         end
@@ -1132,7 +1208,7 @@ x.combat_events = {
   ["ABSORB"] = function(amount, resisted)
       if resisted then
         if ShowResistances() then
-          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), ABSORB, x:Abbreviate(resisted,"damage")), "resist_generic")
+          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), ABSORB, x:Abbreviate(resisted,"damage")), "missTypeAbsorbPartial")
         else
           x:AddMessage("damage", x:Abbreviate(amount,"damage"), "damage")
         end
@@ -1143,7 +1219,7 @@ x.combat_events = {
   ["SPELL_RESIST"] = function(amount, resisted)
       if resisted then
         if ShowResistances() then
-          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), RESIST, x:Abbreviate(resisted,"damage")), "resist_spell")
+          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), RESIST, x:Abbreviate(resisted,"damage")), "missTypeResistPartial")
         else
           x:AddMessage("damage", x:Abbreviate(amount,"damage"), "damage")
         end
@@ -1154,7 +1230,7 @@ x.combat_events = {
   ["SPELL_BLOCK"] = function(amount, resisted)
       if resisted then
         if ShowResistances() then
-          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), BLOCK, x:Abbreviate(resisted,"damage")), "resist_spell")
+          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), BLOCK, x:Abbreviate(resisted,"damage")), "missTypeBlockPartial")
         else
           x:AddMessage("damage", x:Abbreviate(amount,"damage"), "damage")
         end
@@ -1165,7 +1241,7 @@ x.combat_events = {
   ["SPELL_ABSORB"] = function(amount, resisted)
       if resisted then
         if ShowResistances() then
-          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), ABSORB, x:Abbreviate(resisted,"damage")), "resist_spell")
+          x:AddMessage("damage", sformat(format_resist, x:Abbreviate(amount,"damage"), ABSORB, x:Abbreviate(resisted,"damage")), "missTypeAbsorbPartial")
         else
           x:AddMessage("damage", x:Abbreviate(amount,"damage"), "damage")
         end
@@ -1693,14 +1769,14 @@ x.outgoing_events = {
         if multistrike then
           x:MultistrikeSpellEvent( spellID, amount )
         else
-          x:EnqueueMultistrikeSpell( "RANGE_DAMAGE", outputFrame, spellID, amount, critical, merged )
+          x:EnqueueMultistrikeSpell( "RANGE_DAMAGE", outputFrame, spellID, amount, critical, merged, autoShot )
         end
         
         return
       end
       
       -- Output to Message Frame (Do not format multistrikes here)
-      xCTFormat:RANGE_DAMAGE( (multistrike and 1) or 0, outputFrame, spellID, amount, critical, merged )
+      xCTFormat:RANGE_DAMAGE( (multistrike and 1) or 0, outputFrame, spellID, amount, critical, merged, autoShot )
     end,
     
   ["SPELL_DAMAGE"] = function(...)
@@ -1826,14 +1902,12 @@ x.outgoing_events = {
       end
       
       -- Add Icons
-      if x.db.profile.frames[outputFrame].iconsEnabled then
-        if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-          message = x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize) .. "  " .. message
-        else
-          message = message .. x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize)
-        end
-      end
-      
+      message = x:GetSpellTextureFormatted( spellID,
+                                            message,
+                                            0, -- No multistrike
+           x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+           x.db.profile.frames[outputFrame].fontJustify )
+           
       x:AddMessage(outputFrame, message, outputColor)
     end,
     
@@ -1845,13 +1919,11 @@ x.outgoing_events = {
       if missType ~= "IMMUNE" and not ShowMisses() then return end
       
       -- Add Icons
-      if x.db.profile.frames[outputFrame].iconsEnabled then
-        if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-          message = x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize) .. "  " .. message
-        else
-          message = message .. x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize)
-        end
-      end
+      message = x:GetSpellTextureFormatted( spellID,
+                                            message,
+                                            0, -- No multistrike
+           x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+           x.db.profile.frames[outputFrame].fontJustify )
       
       x:AddMessage(outputFrame, message, outputColor)
     end,
@@ -1864,13 +1936,11 @@ x.outgoing_events = {
       if missType ~= "IMMUNE" and not ShowMisses() then return end
       
       -- Add Icons
-      if x.db.profile.frames[outputFrame].iconsEnabled then
-        if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-          message = x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize) .. "  " .. message
-        else
-          message = message .. x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize)
-        end
-      end
+      message = x:GetSpellTextureFormatted( spellID,
+                                            message,
+                                            0, -- No multistrike
+           x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+           x.db.profile.frames[outputFrame].fontJustify )
       
       x:AddMessage(outputFrame, message, outputColor)
     end,
@@ -1887,13 +1957,11 @@ x.outgoing_events = {
       end
       
       -- Add Icons
-      if x.db.profile.frames[outputFrame].iconsEnabled then
-        if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-          message = x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize) .. "  " .. message
-        else
-          message = message .. x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize)
-        end
-      end
+      message = x:GetSpellTextureFormatted( spellID,
+                                            message,
+                                            0, -- No multistrike
+           x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+           x.db.profile.frames[outputFrame].fontJustify )
       
       if MergeDispells() then
         x:AddSpamMessage("general", spellName, message, outputColor, 0.5)
@@ -1909,13 +1977,11 @@ x.outgoing_events = {
       local outputFrame, message, outputColor = "general", sformat(format_dispell, XCT_STOLE, spellName), "dispellStolen"
       
       -- Add Icons
-      if x.db.profile.frames[outputFrame].iconsEnabled then
-        if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-          message = x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize) .. "  " .. message
-        else
-          message = message .. x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize)
-        end
-      end
+      message = x:GetSpellTextureFormatted( spellID,
+                                            message,
+                                            0, -- No multistrike
+           x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+           x.db.profile.frames[outputFrame].fontJustify )
       
       x:AddMessage(outputFrame, message, outputColor)
     end,
@@ -1927,13 +1993,11 @@ x.outgoing_events = {
       local outputFrame, message, outputColor = "general", sformat(format_dispell, INTERRUPTED, effect), "interrupts"
       
       -- Add Icons
-      if x.db.profile.frames[outputFrame].iconsEnabled then
-        if x.db.profile.frames[outputFrame].fontJustify == "LEFT" then
-          message = x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize) .. "  " .. message
-        else
-          message = message .. x:GetSpellTextureFormatted(spellID, x.db.profile.frames[outputFrame].iconsSize)
-        end
-      end
+      message = x:GetSpellTextureFormatted( spellID,
+                                            message,
+                                            0, -- No multistrike
+           x.db.profile.frames[outputFrame].iconsEnabled and x.db.profile.frames[outputFrame].iconsSize or -1,
+           x.db.profile.frames[outputFrame].fontJustify )
       
       x:AddMessage(outputFrame, message, outputColor)
     end,

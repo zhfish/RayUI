@@ -9,31 +9,34 @@ local GetInventoryItemID = GetInventoryItemID
 
 local _, addon = ...
 
-local DRAGONWRATH = GetItemInfo(71086) -- "Dragonwrath, Tarecgosa's Rest"
+addon:RegisterName("Dragonwrath, Tarecgosa's Rest", 71086, 1)
 
---local DRAGONWRATH = "Dragonwrath, Tarecgosa's Rest" -- For taking an enUS screenshot...
-
-function addon:GetDragonwrathName()
-	if DRAGONWRATH then
-		return DRAGONWRATH
-	end
-
-	DRAGONWRATH = GetItemInfo(71086)
-	return DRAGONWRATH or "Hitem:71086"
+local function OnEvent()
+	addon:SetAttribute("dragonwrath", GetInventoryItemID("player", 16) == 71086)
 end
 
 local frame = CreateFrame("Frame")
-frame:RegisterEvent("PLAYER_ENTERING_WORLD")
-frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+frame:SetScript("OnEvent", OnEvent)
 
-frame:SetScript("OnEvent", function(self, event)
-	local dragonwrathEquipped
-	if GetInventoryItemID("player", 16) == 71086 then
-		dragonwrathEquipped = 1
-	end
+addon:RegisterEventCallback("OnNewUserData", function(db)
+	db.dragonwrathFirst = 1
+end)
 
-	if addon.dragonwrathEquipped ~= dragonwrathEquipped then
-		addon.dragonwrathEquipped = dragonwrathEquipped
-		addon:UpdateAttributes()
+addon:RegisterOptionCallback("dragonwrathFirst", function(value)
+	if value then
+		frame:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
+		OnEvent()
+	else
+		frame:UnregisterAllEvents()
+		addon:SetAttribute("dragonwrath", nil)
 	end
 end)
+
+addon:AppendVariables([[
+	local dragonwrath = self:GetAttribute("dragonwrath")
+]])
+
+addon:AppendConditions([[
+	elseif dragonwrath then
+		macro = "/use 16"
+]])

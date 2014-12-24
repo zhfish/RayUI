@@ -127,24 +127,31 @@
 	<Frame name="FollowerLocationInfoDescLineTemplate" virtual="TRUE" hidden="TRUE">
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString parentKey="title" inherits="GameFontNormal" justifyH="RIGHT" nonspacewrap="TRUE">
-					<Size x="120" />
+				<FontString parentKey="title" inherits="GameFontNormal" justifyH="LEFT" nonspacewrap="TRUE">
+					<Size x="420" />
 					<Anchors>
-						<Anchor point="TOPLEFT" />
+						<Anchor point="TOPLEFT" x="25"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="text" inherits="GameFontHighlight" justifyH="LEFT" nonspacewrap="TRUE" hidden="TRUE">
-					<Size x="300" />
+					<Size x="400" />
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.title" relativePoint="TOPRIGHT" x="6" />
+						<Anchor point="TOPLEFT" relativeKey="$parent.title" relativePoint="BOTTOMLEFT" x="10" y="0" />
 					</Anchors>
 				</FontString>
 				<Texture parentKey="img" hidden="TRUE">
 					<Size x="256" y="256" />
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.title" relativePoint="TOPRIGHT" x="6" />
+						<Anchor point="TOPLEFT" relativeKey="$parent.title" relativePoint="BOTTOMLEFT" x="10" />
 					</Anchors>
 				</Texture>
+				<FontString parentKey="imgText" inherits="GameFontHighlight" hidden="true">
+					<Size x="120" />
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.img" relativePoint="TOPRIGHT" x="8" />
+						<Anchor point="LEFT" />
+					</Anchors>
+				</FontString>
 			</Layer>
 		</Layers>
 		<Frames>
@@ -163,7 +170,7 @@
 				if (self.tooltip) then
 					GameTooltip:SetOwner(self,"ANCHOR_NONE");
 					GameTooltip:SetPoint("BOTTOM",self,"TOP",0,0);
-					GameTooltip:SetPoint("LEFT",self.title,"RIGHT",6,0);
+					GameTooltip:SetPoint("LEFT",self.title,"LEFT",6,0);
 					if (type(self.tooltip)=="string") then
 						GameTooltip:SetText(self.tooltip);
 					elseif (type(self.tooltip)=="table") and (#self.tooltip>0) then
@@ -171,6 +178,8 @@
 						for i=2, #self.tooltip do
 							GameTooltip:AddLine(self.tooltip[i],1,1,1,1);
 						end
+					elseif (type(self.tooltip)=="function") then
+						self.tooltip(self,GameTooltip);
 					end
 					GameTooltip:Show();
 				end
@@ -184,7 +193,7 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="FollowerLocationInfoFilterTemplate" virtual="TRUE">
+	<Frame name="FollowerLocationInfoFilterTemplate" virtual="TRUE" hidden="TRUE">
 		<Size x="0" y="16" />
 		<Frames>
 			<Button parentKey="Button">
@@ -449,19 +458,6 @@
 				</Scripts>
 			</EditBox>
 
-			<Frame parentKey="ClassFilter" inherits="FollowerLocationInfoFilterTemplate" hidden="TRUE">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.Search" relativePoint="BOTTOMLEFT" y="-4" />
-					<Anchor point="TOPRIGHT" relativeKey="$parent.Search" relativePoint="BOTTOMRIGHT" y="-4" />
-				</Anchors>
-			</Frame>
-
-			<Frame parentKey="AbilityFilter" inherits="FollowerLocationInfoFilterTemplate" hidden="TRUE">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.ClassFilter" relativePoint="BOTTOMLEFT" y="-4" />
-					<Anchor point="TOPRIGHT" relativeKey="$parent.ClassFilter" relativePoint="BOTTOMRIGHT" y="-4" />
-				</Anchors>
-			</Frame>
 			<!-- /Follower list - Options area -->
 
 			<Frame parentKey="ListBG" hidden="TRUE">

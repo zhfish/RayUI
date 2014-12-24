@@ -22,8 +22,12 @@
 -- slider.OnSliderChanged = function(self, value) end
 
 -- combo = page:CreateComboBox("text" [, horizontal [, disableInCombat]])
--- combo:AddLine(text, value [, icon [, flag [, r, g, b [, position]]]]) -- flag: 1-isTitle, 2-disabled, 3-notClickable, 4-notCheckable
+-- combo:AddLine(text, value [, icon [, flags [, r, g, b [, position]]]]) -- flags: 1-isTitle, 2-disabled, 3-notClickable, 4-notCheckable
+-- combo:AddLine(text, value [, icon [, "flags" [, r, g, b [, position]]]]) -- "flags": combination of flags separated by commas, i.e. "isTitle, disabled, notClickable, notCheckable"
 -- combo:OnMenuRequest() -- Callback, if this function exists, "AddLine" will have no effect outside of "OnMenuRequest"
+-- combo:SetText("text") - Specify the text of the combo itself, not its label
+-- combo:SetTextColor(r, g, b) -- Specify text color of the combo box
+-- combo:SetTextColor(colorTable) -- Specify text color of the combo box, color table { r=?, g=?, b=? }
 -- combo:DeleteLine(value [, noNotify])
 -- combo:NumLines()
 -- combo:GetLineData(position)
@@ -95,7 +99,7 @@ local UISpecialFrames = UISpecialFrames
 local _
 
 local MAJOR_VERSION = 1
-local MINOR_VERSION = 73
+local MINOR_VERSION = 74
 
 -- To prevent older libraries from over-riding newer ones...
 if type(UICreateInterfaceOptionPage_IsNewerVersion) == "function" and not UICreateInterfaceOptionPage_IsNewerVersion(MAJOR_VERSION, MINOR_VERSION) then return end
@@ -496,6 +500,18 @@ local function CreateSmallSlider(self, text, minVal, maxVal, step, valueFormat, 
 	return slider
 end
 
+local function ComboBox_SetText(self, text)
+	self.dropdown.text:SetText(text)
+end
+
+local function ComboBox_SetTextColor(self, r, g, b)
+	if type(r) == "table" then
+		self.dropdown.text:SetTextColor(r.r, r.g, r.b)
+	else
+		self.dropdown.text:SetTextColor(r, g, b)
+	end
+end
+
 local VOID_LINE = {}
 local function ComboBox_UpdateSelection(self, line, noNotify)
 	if not line then
@@ -503,11 +519,11 @@ local function ComboBox_UpdateSelection(self, line, noNotify)
 	end
 
 	if not line.notCheckable then
-		self.dropdown.text:SetText(line.text)
+		ComboBox_SetText(self, line.text)
 		if self:IsEnabled() then
-			self.dropdown.text:SetTextColor(line.r or HIGHLIGHT_FONT_COLOR.r, line.g or HIGHLIGHT_FONT_COLOR.g, line.b or HIGHLIGHT_FONT_COLOR.b)
+			ComboBox_SetTextColor(self, line.r or HIGHLIGHT_FONT_COLOR.r, line.g or HIGHLIGHT_FONT_COLOR.g, line.b or HIGHLIGHT_FONT_COLOR.b)
 		else
-			self.dropdown.text:SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
+			ComboBox_SetTextColor(self, GRAY_FONT_COLOR)
 		end
 
 		self.value = line.value
@@ -602,7 +618,7 @@ local function ComboBox_DeleteLine(self, value, noNotify)
 	local i, line = ComboBox_FindLineData(self, value)
 	if i then
 		self.value = nil
-		self.dropdown.text:SetText()
+		ComboBox_SetText(self)
 		if not noNotify then
 			pcall(self.OnComboChanged, self)
 		end
@@ -613,7 +629,7 @@ end
 local function ComboBox_ClearLines(self, noNotify)
 	wipe(self.dropdown.lines)
 	self.value = nil
-	self.dropdown.text:SetText()
+	ComboBox_SetText(self)
 	if not noNotify then
 		pcall(self.OnComboChanged, self)
 	end
@@ -666,14 +682,13 @@ end
 
 local function ComboBox_OnEnable(self)
 	self.toggleButton:Enable()
-	local textColor = self.defaultColor or NORMAL_FONT_COLOR
-	self.text:SetTextColor(textColor.r, textColor.g, textColor.b)
+	ComboBox_SetTextColor(self, self.defaultColor or NORMAL_FONT_COLOR)
 	ComboBox_SetSelection(self, self.value, 1)
 end
 
 local function ComboBox_OnDisable(self)
 	self.toggleButton:Disable()
-	self.text:SetTextColor(GRAY_FONT_COLOR.r, GRAY_FONT_COLOR.g, GRAY_FONT_COLOR.b)
+	ComboBox_SetTextColor(self, GRAY_FONT_COLOR)
 	ComboBox_SetSelection(self, self.value, 1)
 end
 
@@ -733,6 +748,8 @@ local function CreateComboBox(self, text, horizontal, disableInCombat, textColor
 	hooksecurefunc(frame, "Disable", ComboBox_OnDisable)
 
 	frame.OnShow = ComboBox_OnShow
+	frame.SetText = ComboBox_SetText
+	frame.SetTextColor = ComboBox_SetTextColor
 	frame.ClearLines = ComboBox_ClearLines
 	frame.AddLine = ComboBox_AddLine
 	frame.NumLines = ComboBox_NumLines

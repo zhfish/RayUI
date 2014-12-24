@@ -9,10 +9,9 @@ local format = format
 local type = type
 local GetBindingKey = GetBindingKey
 local GetItemInfo = GetItemInfo
-local OPTION_TOOLTIP_AUTO_LOOT_NONE_KEY = OPTION_TOOLTIP_AUTO_LOOT_NONE_KEY
+local NOT_BOUND = NOT_BOUND
 
-local addonName, addon = ...
-_G.IntelliMount = addon
+local _, addon = ...
 
 local L = addon.L
 
@@ -20,7 +19,8 @@ BINDING_HEADER_INTELLIMOUNT_TITLE = "IntelliMount"
 BINDING_NAME_INTELLIMOUNT_HOTKEY1 = L["summon regular mount"]
 BINDING_NAME_INTELLIMOUNT_HOTKEY2 = L["summon passenger mount"]
 BINDING_NAME_INTELLIMOUNT_HOTKEY3 = L["summon vendors mount"]
-BINDING_NAME_INTELLIMOUNT_HOTKEY4 = L["summon water strider"]
+BINDING_NAME_INTELLIMOUNT_HOTKEY4 = L["summon water surface mount"]
+BINDING_NAME_INTELLIMOUNT_HOTKEY5 = L["summon underwater mount"]
 
 addon.db = {}
 
@@ -28,20 +28,7 @@ local frame = UICreateInterfaceOptionPage("IntelliMountOptionFrame", "IntelliMou
 addon.optionFrame = frame
 
 local group = frame:CreateMultiSelectionGroup(L["summon regular mount"])
-frame:AnchorToTopLeft(group, 0, -16)
-
-local TRAVEL_FORM = GetSpellInfo(783) -- "Travel Form"
-local WOLF_FORM = GetSpellInfo(2645) -- "Ghost Wolf"
-local MAGIC_BROOM = GetSpellInfo(47977) -- "Magic Broom"
-local ABYSS_SEAHORSE = GetSpellInfo(75207) -- "Abyssal Seahorse"
-
---[[
--- For taking an enUS screenshot...
-local TRAVEL_FORM = "Travel Form"
-local WOLF_FORM = "Ghost Wolf"
-local MAGIC_BROOM = "Magic Broom"
-local ABYSS_SEAHORSE = "Abyssal Seahorse"
---]]
+frame:AnchorToTopLeft(group, 0, -10)
 
 local function CreateDummyCheck(text)
 	local button = group:AddButton(text)
@@ -50,12 +37,13 @@ local function CreateDummyCheck(text)
 	return button
 end
 
-CreateDummyCheck(format(L["tavel or wolf in combat"], TRAVEL_FORM, WOLF_FORM))
-group:AddButton(format(L["prefer travel form"], TRAVEL_FORM), "travelFormFirst", 1)
-group:AddButton(format(L["prefer seahorse"], ABYSS_SEAHORSE), "seahorseFirst", 1)
-local dragonwrathButton = group:AddButton(format(L["prefer dragonwrath"], addon:GetDragonwrathName()), "dragonwrathFirst", 1)
-group:AddButton(format(L["prefer magic broom"], MAGIC_BROOM), "broomFirst", 1)
+CreateDummyCheck(format(L["auto specia forms"], addon:QueryName("Travel Form"), addon:QueryName("Cat Form"), addon:QueryName("Ghost Wolf")))
+group:AddButton(format(L["prefer travel form"], addon:QueryName("Travel Form")), "travelFormFirst", 1)
+group:AddButton(format(L["prefer seahorse"], addon:QueryName("Abyssal Seahorse")), "seahorseFirst", 1)
+local dragonwrathButton = group:AddButton(format(L["prefer dragonwrath"], addon:QueryName("Dragonwrath, Tarecgosa's Rest")), "dragonwrathFirst", 1)
+group:AddButton(format(L["prefer magic broom"], addon:QueryName("Magic Broom")), "broomFirst", 1)
 CreateDummyCheck(L["summon system random mounts otherwise"])
+group:AddButton(L["enable debug mode"], "debugMode")
 
 group.buttonId = 1
 group.hotkeyText = frame:CreateFontString(nil, "ARTWORK", "GameFontGreen")
@@ -71,7 +59,7 @@ end
 
 function group:OnCheckChanged(value, checked)
 	addon.db[value] = checked
-	addon:UpdateAttributes()
+	addon:BroadcastOptionEvent(value, checked)
 end
 
 local comboBoxes = {}
@@ -83,7 +71,7 @@ end
 local function Combo_OnComboChanged(self, value)
 	if value then
 		addon.db[self.dbKey] = value
-		addon:UpdateAttributes()
+		addon:BroadcastOptionEvent("utilityMount", self.key, value)
 	end
 end
 
@@ -96,30 +84,43 @@ local function Combo_UpdateStats(self)
 end
 
 local function Combo_UpdateHotkeyText(self)
-	self.hotkeyText:SetText("<"..(GetBindingKey("INTELLIMOUNT_HOTKEY"..self.buttonId) or OPTION_TOOLTIP_AUTO_LOOT_NONE_KEY)..">")
+	local key = GetBindingKey("INTELLIMOUNT_HOTKEY"..self.buttonId)
+	self.hotkeyText:SetText("<"..(key or NOT_BOUND)..">")
+	if key then
+		self.hotkeyText:SetTextColor(0, 1, 0)
+	else
+		self.hotkeyText:SetTextColor(0.5, 0.5, 0.5)
+	end
 end
 
-local function CreateMountCombo(text, buttonId, dbKey, dataKey)
+local function CreateMountCombo(text, key)
+	local button = addon:GetActionButton(key)
+	if not button then
+		return -- Should never happen
+	end
+
 	local combo = frame:CreateComboBox(text, nil, 1)
 	tinsert(comboBoxes, combo)
 	combo:SetWidth(240)
-	combo.buttonId, combo.dbKey = buttonId, dbKey
+	combo.buttonId = button:GetID()
+	combo.key = key
+	combo.dbKey = button.dbKey
 
-	if buttonId == 2 then
-		combo:SetPoint("TOPLEFT", group[-1], "BOTTOMLEFT", 4, -40)
+	if combo.buttonId == 2 then
+		combo:SetPoint("TOPLEFT", group[-1], "BOTTOMLEFT", 4, -36)
 	else
-		local prev = comboBoxes[buttonId - 2]
-		combo:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", 0, -40)
+		local prev = comboBoxes[combo.buttonId - 2]
+		combo:SetPoint("TOPLEFT", prev, "BOTTOMLEFT", 0, -30)
 	end
 
-	local hotkeyText = frame:CreateFontString(nil, "ARTWORK", "GameFontGreen")
+	local hotkeyText = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	combo.hotkeyText = hotkeyText
 	hotkeyText:SetPoint("LEFT", combo.text, "RIGHT", 4, 0)
 
 	local i
 	for i = 1, addon:GetNumUtilityMounts() do
 		local data = addon:GetUtilityMountData(i)
-		if data[dataKey] then
+		if data[key] then
 			combo:AddLine(data.name, data.name, data.icon)
 		end
 	end
@@ -130,13 +131,14 @@ local function CreateMountCombo(text, buttonId, dbKey, dataKey)
 	return combo
 end
 
-CreateMountCombo(L["summon passenger mount"], 2, "passengerMount", "passenger")
-CreateMountCombo(L["summon vendors mount"], 3, "vendorMount", "vendor")
-CreateMountCombo(L["summon water strider"], 4, "waterStrider", "water")
+CreateMountCombo(L["summon passenger mount"], "passenger")
+CreateMountCombo(L["summon vendors mount"], "vendor")
+CreateMountCombo(L["summon water surface mount"], "surface")
+CreateMountCombo(L["summon underwater mount"], "underwater")
 
 frame:SetScript("OnShow", function(self)
 	Combo_UpdateHotkeyText(group)
-	dragonwrathButton.text:SetText(format(L["prefer dragonwrath"], addon:GetDragonwrathName()))
+	dragonwrathButton.text:SetText(format(L["prefer dragonwrath"], addon:QueryName("Dragonwrath, Tarecgosa's Rest")))
 	addon:UpdateUtilityMounts()
 
 	local _, combo
@@ -145,29 +147,28 @@ frame:SetScript("OnShow", function(self)
 		Combo_UpdateHotkeyText(combo)
 	end
 
-	--[[
 	-- For taking an enUS screenshot...
-	comboBoxes[1].dropdown.text:SetText("X-53 Touring Rocket")
-	comboBoxes[2].dropdown.text:SetText("Traveler's Tundra Mammoth")
-	comboBoxes[3].dropdown.text:SetText("Azure Water Strider")
-	--]]
-end)
-
-frame:RegisterEvent("ADDON_LOADED")
-frame:SetScript("OnEvent", function(self, event, arg1)
-	if event == "ADDON_LOADED" and arg1 == addonName then
-		if type(IntelliMountDB) ~= "table" then
-			IntelliMountDB = { travelFormFirst = 1, seahorseFirst = 1, dragonwrathFirst = 1, broomFirst = 1 }
-		end
-
-		addon.db = IntelliMountDB
-		addon:UpdateBindings()
-		addon:UpdateAttributes()
+	if addon.FORCE_ENUS then
+		comboBoxes[1]:SetText("X-53 Touring Rocket")
+		comboBoxes[2]:SetText("Traveler's Tundra Mammoth")
+		comboBoxes[3]:SetText("Azure Water Strider")
+		comboBoxes[4]:SetText("Riding Turtle")
 	end
 end)
 
-SLASH_INTELLIMOUNT1 = "/intellimount"
-SLASH_INTELLIMOUNT2 = "/inm"
-SlashCmdList["INTELLIMOUNT"] = function()
-	frame:Open()
+local function InitOption(key)
+	addon:BroadcastOptionEvent(key, addon.db[key])
 end
+
+addon:RegisterEventCallback("OnInitialize", function(db)
+	InitOption("travelFormFirst")
+	InitOption("seahorseFirst")
+	InitOption("dragonwrathFirst")
+	InitOption("broomFirst")
+	InitOption("debugMode")
+
+	local _, combo
+	for _, combo in ipairs(comboBoxes) do
+		addon:BroadcastOptionEvent("utilityMount", combo.key, db[combo.dbKey])
+	end
+end)

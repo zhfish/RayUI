@@ -1,13 +1,16 @@
-## Interface: 60000
+## Interface: 50100
+## X-Curse-Packaged-Version: 5.1.0.13-Release
+## X-Curse-Project-Name: Bimbo
+## X-Curse-Project-ID: bimbo
+## X-Curse-Repository-ID: wow/bimbo/mainline
 
 ## Title: Bimbo
 ## Notes: Check for unenchanted and ungemmed items
 ## Author: Tekkub Stoutwrithe
-## Version: Alpha
+## Version: 5.1.0.13
 ## X-Website: http://www.tekkub.net/
 ## X-Email: tekkub-wow@googlegroups.com
 ## X-Category: Inventory
-## RequiredDeps: RayUI
 
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Execute: CreateFrame("Frame", nil, CharacterFrame):SetScript("OnShow", function(self) LoadAddOn('Bimbo'); self:SetScript("OnShow", nil) end)

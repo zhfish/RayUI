@@ -358,14 +358,14 @@ local spam_format = "%s%s x%s"
 
 -- =====================================================
 -- AddOn:AddSpamMessage(
---		framename,		[string]			- the framename
---		mergeID,		[number or string]	- idenitity items to merge, if number
+--		framename,		[string]              - the framename
+--		mergeID,		[number or string]      - idenitity items to merge, if number
 --												then it HAS TO BE the valid spell ID
---		message,		[number or string]	- the pre-formatted message to be sent,
+--		message,		[number or string]      - the pre-formatted message to be sent,
 --												if its not a number, then only the
 --												first 'message' value that is sent
 --												this mergeID will be used.
---		colorname,		[string or table]	- the name of the color OR a table
+--		colorname,		[string or table]     - the name of the color OR a table
 --												containing the color (e.g.
 --												colorname={1,2,3} -- r=1, b=2, g=3)
 --	)
@@ -509,15 +509,17 @@ do
 				message = x:Abbreviate(tonumber(total), frameIndex[index])
 			end
 			
-			local format_mergeCount = "%s |cffFFFFFFx%s|r"
-			
+			--local format_mergeCount = "%s |cffFFFFFFx%s|r"
+			local strColor = "ffffff"
+      
 			-- Add critical Prefix and Postfix
 			if frameIndex[index] == "critical" then
 				message = format("%s%s%s", x.db.profile.frames["critical"].critPrefix, message, x.db.profile.frames["critical"].critPostfix)
 				
 			-- Show healer name (colored)
 			elseif frameIndex[index] == "healing" then
-				format_mergeCount = "%s |cffFFFF00x%s|r"
+				--format_mergeCount = "%s |cffFFFF00x%s|r"
+        local strColor = "ffff00"
 				if COMBAT_TEXT_SHOW_FRIENDLY_NAMES == "1" then
 					local healerName = stack[idIndex]
 					if x.db.profile.frames["healing"].enableClassNames then
@@ -537,17 +539,24 @@ do
 			end
 			
 			-- Add merge count
-			if #item.entries > 1 then
-				message = sformat(format_mergeCount, message, #item.entries)
-			end
+			--if #item.entries > 1 then
+			--	message = sformat(format_mergeCount, message, #item.entries)
+			--end
 			
+      --stack[idIndex], settings.iconsSize, settings.fontJustify
+      
 			-- Add Icons
-			if settings.iconsEnabled then
-				if settings.fontJustify == "LEFT" then
-					message = x:GetSpellTextureFormatted(stack[idIndex], settings.iconsSize) .. "  " .. message
-				else
-					message = message .. x:GetSpellTextureFormatted(stack[idIndex], settings.iconsSize)
-				end
+			if frameIndex[index] ~= "healing" then
+        message = x:GetSpellTextureFormatted( stack[idIndex],
+                                              message,
+                                              #item.entries,
+                                              settings.iconsEnabled and settings.iconsSize or -1,
+                                              settings.fontJustify,
+                                              strColor, true ) -- Merge Override = true
+      else
+        if #item.entries > 1 then
+          message = sformat("%s |cff%sx%s|r", message, strColor, #item.entries)
+        end
 			end
 		
 			x:AddMessage(frameIndex[index], message, item.color)
@@ -899,18 +908,13 @@ function x.TestMoreUpdate(self, elapsed)
 					x:Clear(output)
 					if x.db.profile.frames[output].secondaryFrame ~= 0 then output = frameIndex[x.db.profile.frames[output].secondaryFrame] else return end
 				end
-				local message = x:Abbreviate(random(60000), "outgoing")
-				if random(5) % 5 == 0 and (x.db.profile.spells.mergeDontMergeCriticals or x.db.profile.spells.mergeCriticalsWithOutgoing or x.db.profile.spells.mergeCriticalsByThemselves) then
-					message = sformat("%s |cffFFFFFFx%s|r", message, random(17)+1)
-				end
+				local message, merged = x:Abbreviate(random(60000), "outgoing")
 				local multistriked = ((random(4) % 4 == 0) and 1 or 0) + ((random(4) % 4 == 0) and 1 or 0)
-				if x.db.profile.frames["outgoing"].iconsEnabled then
-					if x.db.profile.frames["outgoing"].fontJustify == "LEFT" then
-						message = x:GetSpellTextureFormatted(GetRandomSpellID(), x.db.profile.frames["outgoing"].iconsSize, multistriked) .. "  " .. message
-					else
-						message = message .. x:GetSpellTextureFormatted(GetRandomSpellID(), x.db.profile.frames["outgoing"].iconsSize, multistriked)
-					end
+        if random(5) % 5 == 0 and (x.db.profile.spells.mergeDontMergeCriticals or x.db.profile.spells.mergeCriticalsWithOutgoing or x.db.profile.spells.mergeCriticalsByThemselves) then
+					multistriked = random(17)+1
+          merged = true
 				end
+				message = x:GetSpellTextureFormatted( x.db.profile.frames["outgoing"].iconsEnabled and GetRandomSpellID() or -1, message, multistriked, x.db.profile.frames["outgoing"].iconsSize, x.db.profile.frames["outgoing"].fontJustify, nil, merged )
 				x:AddMessage(output, message, x.damagecolor[damageColorLookup[math.random(7)]])
 			elseif self == x.frames["critical"] and random(2) % 2 == 0 then
 				local output = "critical"
@@ -918,19 +922,13 @@ function x.TestMoreUpdate(self, elapsed)
 					x:Clear(output)
 					if x.db.profile.frames[output].secondaryFrame ~= 0 then output = frameIndex[x.db.profile.frames[output].secondaryFrame] else return end
 				end
-				--local message = x:Abbreviate(random(80000, 200000), "critical")
-				local message = x.db.profile.frames.critical.critPrefix .. x:Abbreviate(random(60000), "critical") .. x.db.profile.frames.critical.critPostfix
-				if (random(5) % 5 == 0) and (x.db.profile.spells.mergeCriticalsWithOutgoing or x.db.profile.spells.mergeCriticalsByThemselves) then
-					message = sformat("%s |cffFFFFFFx%s|r", message, random(17)+1)
+				local message, merged = x.db.profile.frames.critical.critPrefix .. x:Abbreviate(random(60000), "critical") .. x.db.profile.frames.critical.critPostfix
+        local multistriked = ((random(4) % 4 == 0) and 1 or 0) + ((random(4) % 4 == 0) and 1 or 0)
+        if (random(5) % 5 == 0) and (x.db.profile.spells.mergeCriticalsWithOutgoing or x.db.profile.spells.mergeCriticalsByThemselves) then
+					multistriked = random(17)+1
+          merged = true
 				end
-				local multistriked = ((random(4) % 4 == 0) and 1 or 0) + ((random(4) % 4 == 0) and 1 or 0)
-				if x.db.profile.frames["critical"].iconsEnabled then
-					if x.db.profile.frames["critical"].fontJustify == "LEFT" then
-						message = x:GetSpellTextureFormatted(GetRandomSpellID(), x.db.profile.frames["critical"].iconsSize, multistriked) .. "  " .. message
-					else
-						message = message .. x:GetSpellTextureFormatted(GetRandomSpellID(), x.db.profile.frames["critical"].iconsSize, multistriked)
-					end
-				end
+				message = x:GetSpellTextureFormatted( x.db.profile.frames["critical"].iconsEnabled and GetRandomSpellID() or -1, message, multistriked, x.db.profile.frames["critical"].iconsSize, x.db.profile.frames["critical"].fontJustify, nil, merged )
 				x:AddMessage(output, message, x.damagecolor[damageColorLookup[math.random(7)]])
 			elseif self == x.frames["damage"] and random(2) % 2 == 0 then
 				local output = "damage"
@@ -1113,7 +1111,7 @@ StaticPopupDialogs["XCT_PLUS_HIDE_IN_COMBAT"] = {
 }
 
 StaticPopupDialogs["XCT_PLUS_DB_CLEANUP_1"] = {
-	text			  = "|cff798BDDxCT+ Spring Cleaning|r\n\nHello, |cffFFFF00xCT|r|cffFF0000+|r needed to cleanup some |cffFF0000old or removed spell entries|r from the spam merger. |cffFFFF00Those settings needed to be reset|r. The rest of your profile settings has |cff22FF44remained the same|r.\n\nSorry for this inconvenience.\n\n",
+	text			  = "|cff798BDDxCT+ Spring Cleaning|r\n\nHello, |cffFFFF00xCT|r|cffFF0000+|r needed to cleanup some |cffFF0000old or removed spell entries|r from the spam merger. |cffFFFF00Those settings needed to be reset|r. The rest of your profile settings |cff22FF44remains the same|r.\n\nSorry for this inconvenience.\n\n",
 	timeout			= 0,
 	whileDead		= 1,
 	

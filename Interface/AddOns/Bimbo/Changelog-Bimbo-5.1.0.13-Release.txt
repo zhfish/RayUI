@@ -1,0 +1,32 @@
+tag 5.1.0.13-Release
+34f903bfbcfcff7608ece15fdc8ce6dfc5aa84c1
+tekkub :bear:  <tekkub@gmail.com>
+2013-02-03 21:48:37 -0700
+
+Weekly build
+
+
+--------------------
+
+tekkub :bear: :
+	- Weekly build 5.1.0.13-Release
+	- Update changelog for 5.1.0.13-Release
+	- Update changelog for 5.1.0.12-Beta
+	- Weekly build 5.1.0.12-Beta
+	- Updating TOC to 50100
+Craig R. Hughes:
+	- There are no more Arcanums
+tekkub :bear: :
+	- Update changelog for 5.0.1.11-Beta
+	- Weekly build 5.0.1.11-Beta
+	- Updating TOC to 50001
+	- README update
+	- Fix for 5.0
+tekkub :bear: :
+	- Update changelog for 4.1.0.10-Beta
+	- Weekly build 4.1.0.10-Beta
+	- Updating TOC to 40100
+	- Make wand/thrown check locale-independent
+	Closes #4
+	- Some offhand frills are enchantable now
+	Closes #3

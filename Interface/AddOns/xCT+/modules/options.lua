@@ -1152,41 +1152,80 @@ addon.options.args["Credits"] = {
       order = 3,
       name = " ",
     },
+    
     testerTitle = {
       type = 'description',
-      order = 4,
-      name = "|cffFFFF00Beta Testers|r",
+      order = 10,
+      name = "|cffFFFF00Beta Testers - Version 3.0.0|r",
       fontSize = "large",
     },
     userName1 = {
       type = 'description',
-      order = 5,
+      order = 11,
       fontSize = "medium",
       name = " |cffAAAAFF Alex|r,|cff8080EE BuG|r,|cffAAAAFF Kkthnxbye|r,|cff8080EE Azilroka|r,|cffAAAAFF Prizma|r,|cff8080EE schmeebs|r,|cffAAAAFF Pat|r,|cff8080EE hgwells|r,|cffAAAAFF Jaron|r,|cff8080EE Fitzbattleaxe|r,|cffAAAAFF Nihan|r,|cff8080EE Jaxo|r,|cffAAAAFF Schaduw|r,|cff8080EE sylenced|r,|cffAAAAFF kaleidoscope|r,|cff8080EE Killatones|r,|cffAAAAFF Trokko|r,|cff8080EE Yperia|r,|cffAAAAFF Edoc|r,|cff8080EE Cazart|r,|cffAAAAFF Nevah|r,|cff8080EE Refrakt|r,|cffAAAAFF Thakah|r,|cff8080EE johnis007|r,|cffAAAAFF Sgt|r,|cff8080EE NitZo|r,|cffAAAAFF cptblackgb|r,|cff8080EE pollyzoid|r.",
     },
+    
     testerTitleSpace2 = {
       type = 'description',
-      order = 6,
+      order = 20,
+      name = " ",
+    },
+    curseTitle = {
+      type = 'description',
+      order = 21,
+      name = "|cffFFFF00Beta Testers - Version 4.0.0 (Curse)|r",
+      fontSize = "large",
+    },
+    userName2 = {
+      type = 'description',
+      order = 22,
+      fontSize = "medium",
+      name = " |cffAAAAFF CadjieBOOM|r,|cff8080EE Mokal|r,|cffAAAAFF ShadoFall|r,|cff8080EE alloman|r,|cffAAAAFF chhld|r,|cff8080EE chizzlestick|r,|cffAAAAFF egreym|r,|cff8080EE nukme|r,|cffAAAAFF razrwolf|r,|cff8080EE star182|r,|cffAAAAFF zacheklund|r"
+    },
+    
+    testerTitleSpace3 = {
+      type = 'description',
+      order = 30,
+      name = " ",
+    },
+    tukuiTitle = {
+      type = 'description',
+      order = 31,
+      name = "|cffFFFF00Beta Testers - Version 4.0.0 (Tukui)|r",
+      fontSize = "large",
+    },
+    userName3 = {
+      type = 'description',
+      order = 32,
+      fontSize = "medium",
+      name = " |cffAAAAFF Affiniti|r,|cff8080EE Badinfluence|r,|cffAAAAFF Badinfluence|r,|cff8080EE BuG|r,|cffAAAAFF Curdi|r,|cff8080EE Dorkie|r,|cffAAAAFF Galadeon|r,|cff8080EE HarryDotter|r,|cffAAAAFF Joebacsi21|r,|cff8080EE Kuron|r,|cffAAAAFF Mabb22|r,|cff8080EE Narlya|r,|cffAAAAFF Nihan|r,|cff8080EE Verdell|r,|cffAAAAFF arzelia|r,|cff8080EE blessed|r,|cffAAAAFF djouga|r,|cff8080EE fakemessiah|r,|cffAAAAFF faze|r,|cff8080EE firewall|r,|cffAAAAFF jatha86|r,|cff8080EE jaydogg10|r,|cffAAAAFF jlor|r,|cff8080EE lunariongames|r,|cffAAAAFF stoankold|r",
+    },
+      
+    testerTitleSpace4 = {
+      type = 'description',
+      order = 40,
       name = " ",
     },
     contactTitle = {
       type = 'description',
-      order = 7,
+      order = 41,
       name = "|cffFFFF00Contact Me|r",
       fontSize = "large",
     },
+    
     contactStep1 = {
       type = 'description',
-      order = 8,
+      order = 50,
       name = "1. GitHub: |cff22FF80https://github.com/dandruff/xCT|r\n\n2. Send a PM to |cffFF8000Dandruff|r on http://tukui.org",
     },
-    testerTitleSpace3 = {
+    testerTitleSpace5 = {
       type = 'description',
-      order = 9,
+      order = 51,
       name = "\n\n\n\n\n\n\n\n\n",
     },
     multistikeDebug = {
-      order = 10,
+      order = 52,
       type = 'toggle',
       name = "Verbose Debug",
       width = 'full',
@@ -3207,6 +3246,23 @@ addon.options.args["Frames"] = {
               desc = "Shows incoming absorbs.",
               get = get2,
               set = set2,
+            },
+            showOnlyMyHeals = {
+              order = 6,
+              type = 'toggle',
+              name = "Show My Heals Only",
+              desc = "Shows only the player's healing done to himself or herself.",
+              get = get2,
+              set = set2,
+            },
+            showOnlyPetHeals = {
+              order = 7,
+              type = 'toggle',
+              name = "Show Pet Heals Too",
+              desc = "Will also attempt to show the player pet's healing.",
+              get = get2,
+              set = set2,
+              disabled = function() return not x.db.profile.frames.healing.showOnlyMyHeals end
             },
           },
         },

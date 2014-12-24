@@ -11,7 +11,7 @@
 ## Notes-zhTW: Postal: 強化信箱功能。
 ## Notes-zhCN: Postal: 增强信箱功能
 ## Notes-ptBR: Postal: Apoio caixa reforçada
-## OptionalDeps: Ace3, !BlizzBugsSuck, !ClassColors, RayUI
+## OptionalDeps: Ace3, !BlizzBugsSuck, !ClassColors
 ## SavedVariables: Postal3DB
 ## X-Curse-Packaged-Version: v3.5.3
 ## X-Curse-Project-Name: Postal
@@ -45,5 +45,3 @@ Modules\Rake.lua
 Modules\BlackBook.lua
 Modules\DoNotWant.lua
 Modules\CarbonCopy.lua
-
-skin.lua

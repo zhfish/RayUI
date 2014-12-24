@@ -227,7 +227,7 @@ function x:CompatibilityLogic( existing )
     end
     
     -- Updating Spam Merger for 4.0.0 Beta 4 (Requires a reset)
-    if CompareVersions( VersionToTable("4.0.0 BETA 6"), previousVersion) > 0 then
+    if CompareVersions( VersionToTable("4.0.0"), previousVersion) > 0 then
       -- Reset merge table
       self.db.profile.spells.merge = {}
       
@@ -584,7 +584,7 @@ function x:UpdateComboPointOptions(force)
     end
   end
   
-  -- addon.options.args["Frames"].args["class"].args["tracker"] = comboSpells
+  addon.options.args["Frames"].args["class"].args["tracker"] = comboSpells
   
   x.LOADED_COMBO_POINTS_OPTIONS = true
   
@@ -1078,6 +1078,7 @@ local tips = {
   "|cffFFFF00xCT+|r has several different ways it will merge critical hits. You can check them out in |cffFFFF00Spam Merer|r.",
   "Each frame has a |cffFFFF00Special Tweaks|r section; select a frame and select the drop-down box to find it.",
   "If there is a certain |cff798BDDSpell|r, |cff798BDDBuff|r, or |cff798BDDDebuff|r that you don't want to see, consider adding it to a |cff798BDDFilter|r.",
+  "There is a new |cff798BDDMultistrike|r merging feature. It will delay spells until they multistrike. You can turn it off if you find your spells take too long to display.",
 }
 
 local helpfulList = {}
@@ -1160,7 +1161,7 @@ end
 
 local helpfulLastUpdate = GetTime()
 function x:OnAddonConfigRefreshed()
-  if GetTime() - helpfulLastUpdate > 30 then
+  if GetTime() - helpfulLastUpdate > 15 then
     helpfulLastUpdate = GetTime()
     addon.options.args.helpfulTip.name = GetNextTip()
     x:RefreshConfig()

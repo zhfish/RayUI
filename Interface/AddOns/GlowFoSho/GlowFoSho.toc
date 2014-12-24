@@ -11,7 +11,7 @@
 ## X-Embeds: Ace3, LibDropdown-1.0
 ## X-Category: Miscellaneous
 ## X-eMail: vinaur@gmail.com
-## X-Curse-Packaged-Version: r103
+## X-Curse-Packaged-Version: r106
 ## X-Curse-Project-Name: GlowFoSho
 ## X-Curse-Project-ID: glow-fo-sho
 ## X-Curse-Repository-ID: wow/glow-fo-sho/mainline

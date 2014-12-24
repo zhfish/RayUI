@@ -3,6 +3,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("GlowFoSho")
 local LD = LibStub("LibDropdown-1.0")
 
 local currWeaponLink, currPrintLink, currWeaponEnchant
+local loaded = false
 
 GlowFoSho.classicList = {}
 local classicTbl = GlowFoSho.classicList
@@ -69,6 +70,11 @@ end
 
 -- loads the list of enchants for dewdrop menus
 local function LoadEnchantList()
+    if loaded then
+        return
+    end
+    
+    loaded = true
 	local name
 
 	for formulaID, enchant in pairs(enchants) do
@@ -78,22 +84,28 @@ local function LoadEnchantList()
             name = enchant.name
         end
 
+        name = L[name]
+        
+        if enchant.lvl then
+            name = name .. " (" .. enchant.lvl .. ")"
+        end
+
 		if enchant.classic then
-			classicTbl[formulaID] = L[name]
+			classicTbl[formulaID] = name
 		elseif enchant.burningcrusade then
-			bcTbl[formulaID] = L[name]
+			bcTbl[formulaID] = name
 		elseif enchant.wotlk  then
-			wotlkTbl[formulaID] = L[name]
+			wotlkTbl[formulaID] = name
 		elseif enchant.cata then
-			cataTbl[formulaID] = L[name]
+			cataTbl[formulaID] = name
 		elseif enchant.mop then
-			mopTbl[formulaID] = L[name]
+			mopTbl[formulaID] = name
 		elseif enchant.wod then
-			wodTbl[formulaID] = L[name]
+			wodTbl[formulaID] = name
 		elseif enchant.runes then
-			classTbl[formulaID] = L[name]
+			classTbl[formulaID] = name
 		elseif enchant.illusion then
-			illTbl[formulaID] = L[name]
+			illTbl[formulaID] = name
 		end
 	end
 end
@@ -143,6 +155,7 @@ function GlowFoSho:OnInitialize()
 end
 
 function GlowFoSho:OpenDropdown(buttonframe)
+    LoadEnchantList()
 	dropdownOptions = {
 		type = "group",
 		args = {
@@ -303,7 +316,6 @@ end
 
 -- hook to DressUpItemLink function
 function GlowFoSho:DressUpItemLink(link, formulaID)
-    self:Print("trying to dress up " .. gsub(link, "\124", "\124\124") .. " echanted with formular" .. formulaID)
 	if link then
 		local iType
 		local _, link, _, _, _, iType = GetItemInfo(link)
