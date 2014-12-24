@@ -1,16 +1,16 @@
 local mod	= DBM:NewMod("Hodir", "DBM-Ulduar")
 local L		= mod:GetLocalizedStrings()
-local sndWOP	= mod:SoundMM("SoundWOP")
 
-mod:SetRevision(("$Revision: 34 $"):sub(12, -3))
-mod:SetCreatureID(32845)
+mod:SetRevision(("$Revision: 147 $"):sub(12, -3))
+mod:SetCreatureID(32845,32926)
+mod:SetEncounterID(1135)
 mod:SetModelID(28743)
 mod:SetUsedIcons(7, 8)
 
-mod:RegisterCombat("combat")
+mod:RegisterCombat("combat_yell", L.Pull)
 mod:RegisterKill("yell", L.YellKill)
 
-mod:RegisterEvents(
+mod:RegisterEventsInCombat(
 	"SPELL_AURA_APPLIED",
 	"SPELL_AURA_REMOVED",
 	"SPELL_CAST_START",
@@ -31,7 +31,7 @@ local timerFlashFrCD		= mod:NewCDTimer(50, 61968)
 local timerAchieve			= mod:NewAchievementTimer(179, 3182, "TimerSpeedKill")
 
 local yellStormCloud		= mod:NewYell(65133)
-
+local soundFlashFreeze		= mod:NewSound(61968)
 
 mod:AddBoolOption("SetIconOnStormCloud")
 
@@ -49,14 +49,13 @@ function mod:SPELL_CAST_START(args)
 		timerFlashFreeze:Start()
 		warnFlashFreeze:Show()
 		timerFlashFrCD:Start()
-		sndWOP:Play("bluecircle")
+		soundFlashFreeze:Play()
 	end
 end
 
 function mod:SPELL_AURA_APPLIED(args)
 	if args:IsSpellID(62478, 63512) then
 		timerFrozenBlows:Start()
-		sndWOP:Play("healall")
 	elseif args:IsSpellID(65123, 65133) then
 		warnStormCloud:Show(args.destName)
 		if args:IsPlayer() then
@@ -85,6 +84,5 @@ end
 function mod:SPELL_DAMAGE(_, _, _, _, destGUID, _, _, _, spellId)
 	if (spellId == 62038 or spellId == 62188) and destGUID == UnitGUID("player") and self:AntiSpam(4) then
 		specWarnBitingCold:Show()
-		sndWOP:Play("keepmove")
 	end
 end

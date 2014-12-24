@@ -6,7 +6,6 @@
 	end
 end)
 local L		= mod:GetLocalizedStrings()
-local Yike	= mod:SoundMM("SoundWOP")
 
 mod:SetRevision(("$Revision: 32 $"):sub(12, -3))
 mod:SetZone()
@@ -119,7 +118,6 @@ function mod:SPELL_AURA_APPLIED(args)
 		warnAquaBomb:Show(args.destName)
 		specWarnAquaBomb:Show(args.destName)
 		timerAquaBombCD:Start(args.sourceGUID)
-		Yike:Play("dispelnow")
 	end
 end
 mod.SPELL_AURA_APPLIED_DOSE = mod.SPELL_AURA_APPLIED
