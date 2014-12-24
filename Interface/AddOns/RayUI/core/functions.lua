@@ -371,6 +371,7 @@ local healingClasses = {
 	PRIEST = {1, 2}
 }
 
+local gladStance = GetSpellInfo(156291)
 function R:CheckRole()
 	local talentTree = GetSpecialization()
 	local IsInPvPGear = false;
@@ -387,7 +388,7 @@ function R:CheckRole()
 		self.Role = roles[self.myclass][talentTree]
 	end
 
-	if self.Role == "Tank" and (IsInPvPGear or IsSpellKnown(156291)) then
+	if self.Role == "Tank" and (IsInPvPGear or UnitBuff("player", gladStance)) then
 		self.Role = "Melee"
 	end
 
@@ -515,9 +516,9 @@ function R:ShortValue(v)
 		end
 	else
 		if v >= 1e8 or v <= -1e8 then
-			return ("%.1f" .. L["亿"]):format(v / 1e8):gsub("%.?0+([km])$", "%1")
+			return ("%.1f" .. SECOND_NUMBER_CAP):format(v / 1e8):gsub("%.?0+([km])$", "%1")
 		elseif v >= 1e4 or v <= -1e4 then
-			return ("%.1f" .. L["万"]):format(v / 1e4):gsub("%.?0+([km])$", "%1")
+			return ("%.1f" .. FIRST_NUMBER_CAP):format(v / 1e4):gsub("%.?0+([km])$", "%1")
 		else
 			return v
 		end
