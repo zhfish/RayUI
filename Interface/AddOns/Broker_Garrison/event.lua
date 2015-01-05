@@ -24,14 +24,20 @@ function Garrison:GARRISON_MISSION_COMPLETE_RESPONSE(event, missionID, canComple
 	Garrison:Update()
 end
 
-function Garrison:GARRISON_MISSION_STARTED(event, missionID)
+function Garrison:GARRISON_MISSION_STARTED(event, missionID, start)
+
+	local startTime = time()
+
+	if start ~= nil then
+		startTime = start		
+	end
 
 	for key,garrisonMission in pairs(C_Garrison.GetInProgressMissions()) do
 		if (garrisonMission.missionID == missionID) then
 			local mission = {
 				id = garrisonMission.missionID,
 				name = garrisonMission.name,
-				start = time(),
+				start = startTime,
 				duration = garrisonMission.durationSeconds,
 				notification = 0,
 				timeLeft = garrisonMission.timeLeft,
@@ -72,7 +78,7 @@ function Garrison:GARRISON_MISSION_STARTED(event, missionID)
 					}
 
 					local missionModifier = Garrison.missionModifier[tmpAbility.id]
-					if missionModifier then
+					if start == nil and missionModifier then
 						-- modified mission time
 						if not mission.durationOriginal then
 							mission.durationOriginal = mission.duration 
@@ -486,7 +492,7 @@ function Garrison:CheckBuildingInfo()
 	if Garrison.buildingInfo then
 		for buildingName, buildingInfo in pairs(Garrison.buildingInfo) do
 
-			if buildingInfo.trackCustomId then
+			if buildingInfo.trackCustomId and buildingInfo.trackCustom ~= nil then
 				local result = buildingInfo.trackCustom()
 				debugPrint(("BuildingInfo (%s): %s"):format(buildingName, tostring(result)))
 
@@ -532,6 +538,47 @@ function Garrison:QuestHandling()
 	end
 end
 
+function Garrison:GetParsedStartTime(missionTime, duration)
+	local missionTime = Garrison:ParseMissionTime(missionTime)
+
+	return _G.time() - (duration - missionTime)
+end
+
+function Garrison:ParseMissionTime(missionTime)
+	for _, durationData in pairs(Garrison.DURATION_PATTERN) do		
+
+		if not durationData.pattern then
+			durationData.pattern, durationData.captureIndices = Garrison.patternFromFormat(durationData.format)
+			debugPrint(("Pattern compile (%s): %s"):format(durationData.format, durationData.pattern))
+		end
+
+		local result1, result2 = nil, nil
+
+		local retVal = 0
+
+		local result0, result1, result2, result3 = Garrison.superFind(missionTime, durationData.pattern, durationData.captureIndices)
+
+		debugPrint(("%s (%s): %s, %s, %s, %s"):format(missionTime, durationData.pattern, tostring(result0), tostring(result1), tostring(result2), tostring(result3)))
+
+		if result2 ~= nil and durationData.factor[0] then
+
+			retVal = retVal + (result2 * durationData.factor[0])
+			debugPrint(("Calc1: %s * %s = %s"):format(result2, durationData.factor[0], (result2 * durationData.factor[0])))
+		end
+
+		if result3 ~= nil and durationData.factor[1] then
+			retVal = retVal + (result3 * durationData.factor[1])
+			debugPrint(("Calc2: %s * %s = %s"):format(result3, durationData.factor[1], (result3 * durationData.factor[1])))
+		end	
+
+		if retVal ~= 0 then
+			return retVal
+		end
+	end
+
+	return 0
+end
+
 function Garrison:ChatLootEvent(event, ...) 
 	local message = ...
 
@@ -574,12 +621,12 @@ function Garrison:ChatLootEvent(event, ...)
 	end
 end
 
-function Garrison:GetLootInfoForBuilding(playerData, buildingId)
+function Garrison:GetLootInfoForBuilding(playerData, buildingData)
 	local retValue = ""
 	
 	for buildingName, buildingInfo in pairs(Garrison.buildingInfo) do
 		if buildingInfo.level then
-			local buildingLevel = buildingInfo.level[buildingId]
+			local buildingLevel = buildingInfo.level[buildingData.id]
 			if buildingLevel and buildingInfo.trackLootItemId ~= nil and playerData.lootedToday then 
 			local lootedToday = playerData.lootedToday[buildingInfo.trackLootItemId] or 0
 				if buildingInfo.minLooted and lootedToday > buildingInfo.minLooted then
@@ -594,7 +641,9 @@ function Garrison:GetLootInfoForBuilding(playerData, buildingId)
 			end
 
 			if buildingLevel and buildingInfo.trackCustomId ~= nil and playerData.trackWeekly then
-				if buildingInfo.minLevel and buildingLevel >= buildingInfo.minLevel then					
+				if buildingInfo.minLevel and ((buildingLevel > buildingInfo.minLevel)
+					or (not (buildingData.isBuilding or buildingData.canActivate) and buildingLevel == buildingInfo.minLevel))
+				then					
 					local complete = playerData.trackWeekly[buildingInfo.trackCustomId]
 
 					if complete then							
@@ -637,41 +686,49 @@ function Garrison:UpdateCurrency()
 end
 
 function Garrison:QuickUpdate()
-	Garrison:QuestHandling()
+	if configDb.general.updateInCombat or not InCombatLockdown() then
+		Garrison:QuestHandling()
 
-	if not configDb.general.highAccuracy then
-		if configDb.general.showSeconds then
-			Garrison:UpdateLDB()
+		if not configDb.general.highAccuracy then
+			if configDb.general.showSeconds then
+				Garrison:UpdateLDB()
+			end
 		end
-	end
-	
-	if Garrison.location.inGarrison then
-		-- in garrison - full update (quick)
-		Garrison:Update()
+		
+		if Garrison.location.inGarrison then
+			-- in garrison - full update (quick)
+			Garrison:Update()
+		end
 	end
 end
 
 function Garrison:LDBUpdate()
-	Garrison:HandleNotificationQueue()
+	if configDb.general.updateInCombat or not InCombatLockdown() then
+
+		Garrison:HandleNotificationQueue()
 	
-	if configDb.general.highAccuracy then		
-		Garrison:UpdateLDB()
+		if configDb.general.highAccuracy then		
+			Garrison:UpdateLDB()
+		end
 	end
 end
 
 function Garrison:SlowUpdate()
-	if not configDb.general.highAccuracy then
-		if not configDb.general.showSeconds then
-			Garrison:UpdateLDB()
+	if configDb.general.updateInCombat or not InCombatLockdown() then
+
+		if not configDb.general.highAccuracy then
+			if not configDb.general.showSeconds then
+				Garrison:UpdateLDB()
+			end
+		end	
+
+		Garrison:CheckInvasionAvailable()
+		Garrison:CheckBuildingInfo()
+
+		if not Garrison.location.inGarrison then
+			-- not in garrison - full update (slow)
+			Garrison:Update()
 		end
-	end	
-
-	Garrison:CheckInvasionAvailable()
-	Garrison:CheckBuildingInfo()
-
-	if not Garrison.location.inGarrison then
-		-- not in garrison - full update (slow)
-		Garrison:Update()
 	end
 end
 
@@ -725,6 +782,13 @@ function Garrison:GarrisonMinimapMission_ShowPulse()
 		debugPrint("Play Pulse (Mission)")
 		self.hooks.GarrisonMinimapMission_ShowPulse(_G.GarrisonLandingPageMinimapButton)
 	end
+end
+
+function Garrison:RecruitFollower(...)
+	local tmp = ...
+	debugPrint("RecruitFollower"..tostring(tmp))
+
+	globalDb.data[charInfo.realmName][charInfo.playerName].trackWeekly["INN"] = true
 end
 
 --function Garrison:GarrisonCapacitiveDisplayFrame_Update()

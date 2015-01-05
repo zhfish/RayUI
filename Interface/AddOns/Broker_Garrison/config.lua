@@ -186,7 +186,7 @@ function Garrison:GetOptions()
 						end,
 					},
 					showSeconds = {
-						order = 110,
+						order = 115,
 						type = "toggle",
 						width = "double",
 						name = L["Show seconds in LDB/Tooltip"],
@@ -196,7 +196,21 @@ function Garrison:GetOptions()
 							Garrison:UpdateLDB()
 						end,
 						--disabled = function() return not configDb.general.highAccuracy end,
-					},					
+					},
+					updateInCombat = {
+						order = 120,
+						type = "toggle",
+						width = "double",
+						name = L["Run updates (LDB, data queries) in combat"],
+						desc = L["Run updates (LDB, data queries) in combat"],
+						get = function() return configDb.general.updateInCombat end,
+						set = function(_,v) configDb.general.updateInCombat = v
+							Garrison:UpdateLDB()
+						end,
+						--disabled = function() return not configDb.general.highAccuracy end,
+					},
+
+
 					missionGroup = {
 						order = 200,
 						type = "group",
@@ -242,6 +256,7 @@ function Garrison:GetOptions()
 							ldbText = {
 								order = 130,
 								type = "input",
+								multiline = 5,
 								width = "full",
 								name = L["Custom LDB Text"],
 								desc = L["Custom LDB Text"],
@@ -313,6 +328,7 @@ function Garrison:GetOptions()
 								order = 130,
 								type = "input",
 								width = "full",
+								multiline = 5,
 								name = L["Custom LDB Text"],
 								desc = L["Custom LDB Text"],
 								get = function() return configDb.general.building.ldbText end,
@@ -1216,13 +1232,21 @@ function Garrison:GetOptions()
 					version = {				
 						order = 200,
 						type = "description",
+						fontSize = "medium",
 						name = ("Version: %s\n"):format(Garrison.versionString),
 						cmdHidden = true,
 					},
 					about = {
 						order = 300,
 						type = "description",
-						name = ("Author: %s <EU-Khaz'Goroth>\nLayout: %s <EU-Khaz'Goroth>"):format(Garrison.getColoredUnitName("Smb","PRIEST", "EU-Khaz'Goroth"), Garrison.getColoredUnitName("Hotaruby","DRUID", "EU-Khaz'Goroth")),
+						fontSize = "medium",
+						name = ("Author: %s <EU-Khaz'Goroth>\n\nLayout: %s %s / %s <EU-Khaz'Goroth> %s\n\nThanks to:\n\n%s"):format(Garrison.getColoredUnitName("Smb","PRIEST", "EU-Khaz'Goroth"), 
+																										 Garrison.getIconString(Garrison.ICON_PATH_ABOUT1, 20, false, false),
+																										 Garrison.getColoredUnitName("Jarves","ROGUE", "EU-Khaz'Goroth"),
+																										 Garrison.getColoredUnitName("Hotaruby","DRUID", "EU-Khaz'Goroth"),
+																										 Garrison.getIconString(Garrison.ICON_PATH_ABOUT1, 20, false, false),
+																										 "znf (Ideas)\nStanzilla (Ideas)\nTorhal (Ideas, LibQTip, Toaster, ...)\nMegalon (AILO, Lockouts)"
+																										 ),
 						cmdHidden = true,
 					},
 				},
@@ -1393,7 +1417,7 @@ function Garrison.getDataOptionTable()
 			i = i + 1
 		end
 
-		baseOrder = baseOrder + 100
+		baseOrder = baseOrder + 200
 	end
 
 	return dataTable
@@ -1415,7 +1439,7 @@ function Garrison:SetupOptions()
 	options.args.notificationGroup.args.notificationLibSink.order = 600
 	options.args.notificationGroup.args.notificationLibSink.inline = true
 	options.args.notificationGroup.args.notificationLibSink.name = ""
-	options.args.notificationGroup.args.notificationLibSink.disabled = function() return not configDb.notification.enabled end
+	--options.args.notificationGroup.args.notificationLibSink.disabled = function() return not configDb.notification.enabled end
 
 	options.plugins["profiles"] = {
 		--profiles = AceDBOptions:GetOptionsTable(garrisonDb)

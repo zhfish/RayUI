@@ -16,7 +16,7 @@ local GetCursorPosition = GetCursorPosition
 local GetAlTooltip = AtlasLoot.Tooltip.GetTooltip
 
 function MiniMapButton.Init()
-	db = AtlasLoot.db.profile.MiniMapButton
+	db = AtlasLoot.db.MiniMapButton
 	
 	MiniMapButton.Show()
 	
@@ -47,6 +47,17 @@ function MiniMapButton.Toggle()
 	end
 end
 
+function MiniMapButton.Options_Toggle()
+	if not MiniMapButton.frame then MiniMapButton.Show() end
+	if db.shown then
+		MiniMapButton.Show()
+	else
+		if MiniMapButton.frame then
+			MiniMapButton.frame:Hide()
+		end
+	end
+end
+
 function MiniMapButton:Hide()
 	if self.frame then
 		self.frame:Hide()
@@ -54,16 +65,24 @@ function MiniMapButton:Hide()
 end
 
 local function OnButtonMove(self)
-	if self.isMoving then
-		local centerX, centerY = Minimap:GetCenter()
-		local x, y = GetCursorPosition()
-		x, y = x / self:GetEffectiveScale() - centerX, y / self:GetEffectiveScale() - centerY
-		centerX, centerY = abs(x), abs(y)
-		centerX, centerY = (centerX / sqrt(centerX^2 + centerY^2)) * 80, (centerY / sqrt(centerX^2 + centerY^2)) * 80
-		centerX = x < 0 and -centerX or centerX
-		centerY = y < 0 and -centerY or centerY
-		self:ClearAllPoints()
-		self:SetPoint("CENTER", centerX, centerY)
+	if self.isMoving and not db.locked then
+		if db.lockedAroundMiniMap then
+			local centerX, centerY = Minimap:GetCenter()
+			local x, y = GetCursorPosition()
+			x, y = x / self:GetEffectiveScale() - centerX, y / self:GetEffectiveScale() - centerY
+			centerX, centerY = abs(x), abs(y)
+			centerX, centerY = (centerX / sqrt(centerX^2 + centerY^2)) * 80, (centerY / sqrt(centerX^2 + centerY^2)) * 80
+			centerX = x < 0 and -centerX or centerX
+			centerY = y < 0 and -centerY or centerY
+			self:ClearAllPoints()
+			self:SetPoint("CENTER", centerX, centerY)
+		else
+			local centerX, centerY = Minimap:GetCenter()
+			local x, y = GetCursorPosition()
+			x, y = x / self:GetEffectiveScale() - centerX, y / self:GetEffectiveScale() - centerY
+			self:ClearAllPoints()
+			self:SetPoint("CENTER", x, y)
+		end
 	end
 end
 

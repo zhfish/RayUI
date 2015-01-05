@@ -163,7 +163,12 @@ function Garrison.GetTextureForID(id, size)
 end
 
 function Garrison.GetIconPath(name) 
-	local iconPath = Garrison.ICON_REPLACEMENT[name]
+
+	local rawName = _G.strlower(name:gsub(".blp", ""):gsub("\\\\", "\\"))
+
+	local iconPath = Garrison.ICON_REPLACEMENT[rawName]
+
+	-- Garrison.debugPrint(("%s => %s"):format(rawName, tostring(iconPath)))
 
 	if iconPath ~= nil then
 		return iconPath
@@ -209,7 +214,6 @@ function Garrison.getIconString(name, size, isAtlas, ...)
                     name = itemTexture
 				end
 
-
 				if iconZoom then			
 					Garrison.iconCache[key] = string.format("\124T%s:%d:%d:1:0:64:64:4:60:4:60\124t", Garrison.GetIconPath(name), size, size)
 				else
@@ -238,7 +242,7 @@ function Garrison.getColoredUnitName (name, class, realm)
 			classColor = Garrison.colors.white
 		end
 
-		colorUnitName = string.format("|cff%02x%02x%02x%s|r",classColor.r*255,classColor.g*255,classColor.b*255,name)
+		colorUnitName = Garrison.getColoredString(name, classColor)
 
 		unitColor[realm..name] = colorUnitName
 	else
@@ -252,7 +256,7 @@ function Garrison.getColoredTooltipString(text, conditionTable)
 
 	for name, val in pairs(conditionTable) do
 		if (val.condition) then
-			retText = string.format("|cff%02x%02x%02x%s|r",val.color.r*255,val.color.g*255,val.color.b*255, text)
+			retText = Garrison.getColoredString(text, val.color)
 		end
 	end
 
@@ -288,7 +292,15 @@ function Garrison.formattedSeconds(seconds)
 		if configDb.general.showSeconds then
 			return ("%s%d:%02d:%02d"):format(negative, seconds / SECONDS_PER_HOUR, math.fmod(seconds / 60, 60), math.fmod(seconds, 60))
 		else
-			return ("%s%d:%02d"):format(negative, seconds / SECONDS_PER_HOUR, math.ceil(math.fmod(seconds / 60, 60)))
+			local minutes = math.ceil(math.fmod(seconds / 60, 60))
+			local hours = seconds / SECONDS_PER_HOUR
+
+			--if minutes == 60 then
+			--	minutes = 0
+			--	hours = hours + 1
+			--end
+
+			return ("%s%d:%02d"):format(negative, hours, minutes)
 		end
 	end
 end
@@ -344,7 +356,17 @@ end
 function Garrison.replaceVariables(text, data)
 	local returnText = ""
 	if text then
-		returnText = text:gsub("%%(%w+)|?([^%%]*)%%", function (s, default)
+		returnText = text:gsub("=(%x%x)(%x%x)(%x%x)=", 
+		   function (r, g, b)
+		      return ("|cff%s%s%s"):format(r, g, b)
+		end)
+
+		returnText = returnText:gsub("==", 
+		   function (r, g, b)
+		      return "|r"
+		end)
+
+		returnText = returnText:gsub("%%(%w+)|?([^%%]*)%%", function (s, default)
 			local key = tostring(s)
 			local textFun = Garrison.ldbVars[key]
 

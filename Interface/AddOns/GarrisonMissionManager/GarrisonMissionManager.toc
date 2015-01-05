@@ -1,16 +1,18 @@
 ## Interface: 60000
-## X-Curse-Packaged-Version: v12
+## X-Curse-Packaged-Version: v16
 ## X-Curse-Project-Name: Garrison Mission Manager
 ## X-Curse-Project-ID: garrison-mission-manager
 ## X-Curse-Repository-ID: wow/garrison-mission-manager/mainline
 
-## Title: 追随者任务管理
-## Version: v12
-## Notes: 在要塞追随者任务面板增加帮助你选取最佳队伍的功能
+## Title: Garrison Mission Manager
+## Version: v16
+## Notes: Assists you with selecting best team for garrison missions
 ## Author: Oleg "Rowaa[SR13]" Volkov
 
 ## LoadOnDemand: 1
 ## LoadWith: Blizzard_GarrisonUI
+## Dependencies: Blizzard_GarrisonUI
+## OptionalDeps: SR13-TimeRecord
 
 ## SavedVariables: SV_GarrisonMissionManager
 ## SavedVariablesPerCharacter: SVPC_GarrisonMissionManager
