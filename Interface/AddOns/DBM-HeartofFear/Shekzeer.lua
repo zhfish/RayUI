@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(743, "DBM-HeartofFear", nil, 330)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 2 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 30 $"):sub(12, -3))
 mod:SetCreatureID(62837)--62847 Dissonance Field, 63591 Kor'thik Reaver, 63589 Set'thik Windblade
 mod:SetEncounterID(1501)
 mod:SetZone()
@@ -69,8 +69,6 @@ local timerCorruptedDissonance	= mod:NewNextTimer(20, 126122)--10 seconds after 
 local timerHeartOfFear			= mod:NewBuffFadesTimer(6, 125638)
 
 local berserkTimer				= mod:NewBerserkTimer(900)
-
-local soundFixate				= mod:NewSound(125390)
 
 mod:AddBoolOption("InfoFrame")--On by default because these do more then just melee, they interrupt spellcasting (bad for healers)
 mod:AddBoolOption("RangeFrame", mod:IsRanged())
@@ -152,7 +150,6 @@ function mod:SPELL_AURA_APPLIED(args)
 		warnFixate:Show(args.destName)
 		if args:IsPlayer() and not self:IsDifficulty("lfr25") then--in LFR, they are not dangerous, you stack mobs up, don't want to run mobs out of clump
 			specwarnFixate:Show()
-			soundFixate:Play()
 		end
 	elseif spellId == 124862 then
 		visonsTargets[#visonsTargets + 1] = args.destName

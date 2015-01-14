@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(853, "DBM-SiegeOfOrgrimmarV2", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 5 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 31 $"):sub(12, -3))
 mod:SetCreatureID(71152, 71153, 71154, 71155, 71156, 71157, 71158, 71160, 71161)
 mod:SetEncounterID(1593)
 mod:DisableESCombatDetection()
@@ -750,7 +750,7 @@ function mod:SPELL_AURA_APPLIED(args)
 			self:SetIcon(args.destName, 3)
 		end
 		if self.Options.AimArrow then
-			DBM.Arrow:ShowRunTo(args.destName, 3, 3, 5)
+			DBM.Arrow:ShowRunTo(args.destName, 3, 5)
 		end
 	end
 end

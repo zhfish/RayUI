@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(816, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 2 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 30 $"):sub(12, -3))
 mod:SetCreatureID(69078, 69132, 69134, 69131)--69078 Sul the Sandcrawler, 69132 High Prestess Mar'li, 69131 Frost King Malakk, 69134 Kazra'jin --Adds: 69548 Shadowed Loa Spirit,
 mod:SetEncounterID(1570)
 mod:SetZone()
@@ -54,7 +54,7 @@ local warnRecklessCharge			= mod:NewCastAnnounce(137122, 3, 2, nil, false)
 local warnDischarge					= mod:NewCountAnnounce(137166, 3)
 
 --All
-local specWarnPossessed				= mod:NewSpecialWarning("specWarnPossessed", mod:IsDps())
+local specWarnPossessed				= mod:NewSpecialWarning("OptionVersion2", "specWarnPossessed")
 local specWarnDarkPower				= mod:NewSpecialWarningSpell(136507, nil, nil, nil, 2)
 local specWarnSoulFragment			= mod:NewSpecialWarningYou(137641)
 --Sul the Sandcrawler
@@ -64,7 +64,7 @@ local specWarnQuickSand				= mod:NewSpecialWarningMove(136860)
 --High Prestess Mar'li
 local specWarnBlessedLoaSpirit		= mod:NewSpecialWarningSwitch(137203, mod:IsRangedDps())--Ranged should handle this, melee chasing it around is huge dps loss for possessed. On 10 man 2 ranged was enough. If you do not have 2 ranged, 1 or 2 melee will have to help and probably turn this on manually
 local specWarnShadowedLoaSpirit		= mod:NewSpecialWarningSwitch(137350, mod:IsRangedDps())
-local specWarnMarkedSoul			= mod:NewSpecialWarningRun(137359)
+local specWarnMarkedSoul			= mod:NewSpecialWarningRun(137359, nil, nil, nil, 4)
 local specWarnTwistedFate			= mod:NewSpecialWarningSwitch(137891)
 --Frost King Malak
 local specWarnBitingCold			= mod:NewSpecialWarningYou(136992)
@@ -96,7 +96,6 @@ local timerFrigidAssault			= mod:NewTargetTimer(15, 136903, nil, mod:IsTank() or
 local timerFrigidAssaultCD			= mod:NewCDTimer(30, 136904, nil, mod:IsTank() or mod:IsHealer())--30 seconds after last one ended (maybe even a next timer, i'll change it with more logs.)
 --Kazra'jin
 
-local soundMarkedSoul				= mod:NewSound(137359)
 
 local berserkTimer					= mod:NewBerserkTimer(720)
 
@@ -271,7 +270,6 @@ function mod:SPELL_AURA_APPLIED(args)
 		timerMarkedSoul:Start(args.destName)
 		if args:IsPlayer() then
 			specWarnMarkedSoul:Show()
-			soundMarkedSoul:Play()
 		end
 	elseif spellId == 137166 then
 		dischargeCount = dischargeCount + 1

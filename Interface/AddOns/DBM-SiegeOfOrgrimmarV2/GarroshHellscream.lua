@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(869, "DBM-SiegeOfOrgrimmarV2", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 17 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 30 $"):sub(12, -3))
 mod:SetCreatureID(71865)
 mod:SetEncounterID(1623)
 mod:SetZone()
@@ -112,7 +112,6 @@ local timerClumpCheck				= mod:NewNextTimer(3, 147126)
 local timerMaliciousBlast			= mod:NewBuffFadesTimer(3, 147235, nil, false)
 local timerFixate					= mod:NewTargetTimer(12, 147665)
 
-local soundWhirlingCorrpution		= mod:NewSound(144985, false)--Depends on strat. common one on 25 man is to never run away from it
 local countdownPowerIronStar		= mod:NewCountdown(16.5, 144616)
 local countdownWhirlingCorruption	= mod:NewCountdown(49.5, 144985)
 local countdownDesecrate			= mod:NewCountdown("Alt35", 144748)
@@ -142,6 +141,7 @@ local spellName3 = GetSpellInfo(148994)
 local lines = {}
 --Not important, don't need to recover
 local engineerDied = 0
+local numberOfPlayers = 1
 --Important, needs recover
 mod.vb.shamanAlive = 0
 mod.vb.phase = 1
@@ -206,6 +206,7 @@ function mod:OnCombatStart(delay)
 	self.vb.bombardCount = 0
 	self.vb.firstIronStar = false
 	self.vb.phase4Correction = false
+	numberOfPlayers = DBM:GetNumRealGroupMembers()
 	timerDesecrateCD:Start(10.5-delay, 1)
 	countdownDesecrate:Start(10.5-delay)
 	specWarnSiegeEngineer:Schedule(16-delay)
@@ -266,7 +267,6 @@ function mod:SPELL_CAST_START(args)
 		timerWhirlingCorruption:Start()
 		timerWhirlingCorruptionCD:Start(nil, self.vb.whirlCount+1)
 		countdownWhirlingCorruption:Start()
-		soundWhirlingCorrpution:Play()
 	elseif spellId == 147120 then
 		self.vb.bombardCount = self.vb.bombardCount + 1
 		local count = self.vb.bombardCount
@@ -309,6 +309,7 @@ function mod:SPELL_CAST_SUCCESS(args)
 	elseif args:IsSpellID(145065, 145171) then
 		self.vb.mindControlCount = self.vb.mindControlCount + 1
 		specWarnTouchOfYShaarj:Show()
+		if numberOfPlayers < 2 then return end--Solo raid, no mind controls, so no timers/countdowns
 		if self.vb.phase == 3 then
 			if self.vb.mindControlCount == 1 then--First one in phase is shorter than rest (well that or rest are delayed because of whirling)
 				timerTouchOfYShaarjCD:Start(35, self.vb.mindControlCount+1)
@@ -344,16 +345,16 @@ function mod:SPELL_AURA_APPLIED(args)
 		if spellId == 145183 then
 			warnGrippingDespair:Show(args.destName, amount)
 		else
-			if not (UnitDebuff("player", GetSpellInfo(145183)) or UnitDebuff("player", GetSpellInfo(145195))) and not UnitIsDeadOrGhost("player") then
-				warnEmpGrippingDespair:Show(args.destName, amount)
-			end
+			warnEmpGrippingDespair:Show(args.destName, amount)
 		end
 		timerGrippingDespair:Start(args.destName)
 		if amount >= 4 then
 			if args:IsPlayer() then
 				specWarnGrippingDespair:Show(amount)
 			else
-				specWarnGrippingDespairOther:Show(args.destName)
+				if not (UnitDebuff("player", GetSpellInfo(145183)) or UnitDebuff("player", GetSpellInfo(145195))) and not UnitIsDeadOrGhost("player") then
+					specWarnGrippingDespairOther:Show(args.destName)
+				end
 			end
 		end
 	elseif spellId == 144585 then
@@ -456,8 +457,10 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 			hideInfoFrame()
 			timerDesecrateCD:Start(10, 1)
 			countdownDesecrate:Start(10)
-			timerTouchOfYShaarjCD:Start(15, 1)
-			countdownTouchOfYShaarj:Start(15)
+			if numberOfPlayers > 1 then
+				timerTouchOfYShaarjCD:Start(15, 1)
+				countdownTouchOfYShaarj:Start(15)
+			end
 			timerWhirlingCorruptionCD:Start(30, 1)
 			countdownWhirlingCorruption:Start(30)
 			timerEnterRealm:Start()
@@ -478,8 +481,10 @@ function mod:UNIT_SPELLCAST_SUCCEEDED(uId, _, _, _, spellId)
 		countdownWhirlingCorruption:Cancel()
 		timerDesecrateCD:Start(21, 1)
 		countdownDesecrate:Start(21)
-		timerTouchOfYShaarjCD:Start(30, 1)
-		countdownTouchOfYShaarj:Start(30)
+		if numberOfPlayers > 1 then
+			timerTouchOfYShaarjCD:Start(30, 1)
+			countdownTouchOfYShaarj:Start(30)
+		end
 		timerWhirlingCorruptionCD:Start(44.5, 1)
 		countdownWhirlingCorruption:Start(44.5)
 	elseif spellId == 146984 then--Phase 4 trigger

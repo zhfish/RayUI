@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(846, "DBM-SiegeOfOrgrimmarV2", nil, 369)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 5 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 31 $"):sub(12, -3))
 mod:SetCreatureID(71454)
 mod:SetEncounterID(1595)
 mod:SetZone()
@@ -57,8 +57,6 @@ local berserkTimer						= mod:NewBerserkTimer(360)
 local countdownImplodingEnergy			= mod:NewCountdown(10, 142986, nil, nil, 5)
 
 local countdownBreathofYShaarj			= mod:NewCountdown(10, 142842, nil, nil, 5, nil, true)
-
-local soundDisplacedEnergy				= mod:NewSound(142913)
 
 mod:AddRangeFrameOption("8/5")--Various things
 mod:AddSetIconOption("SetIconOnDisplacedEnergy", 142913, false)
@@ -140,7 +138,7 @@ function mod:SPELL_CAST_START(args)
 					local tanking, status = UnitDetailedThreatSituation(uId, "boss1")
 					if status == 3 then
 						if UnitIsUnit("player", uId) then return end
-						DBM.Arrow:ShowRunTo(uId, 3, 3, 5)
+						DBM.Arrow:ShowRunTo(uId, 3, 5)
 						break
 					end
 				end
@@ -186,7 +184,6 @@ function mod:SPELL_AURA_APPLIED(args)
 		playerDebuffs = playerDebuffs + 1
 		if args:IsPlayer() then
 			specWarnDisplacedEnergy:Show()
-			soundDisplacedEnergy:Play()
 			yellDisplacedEnergy:Yell()
 		end
 		if not self.vb.displacedCast then--Only cast twice, so we only start cd bar once here

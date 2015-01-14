@@ -1,9 +1,52 @@
 ------------------------------------------------------------------------
-r4321 | dynaletik | 2014-12-28 18:56:43 +0000 (Sun, 28 Dec 2014) | 1 line
+r4323 | dynaletik | 2015-01-11 19:25:13 +0000 (Sun, 11 Jan 2015) | 1 line
 Changed paths:
-   A /tags/v8.00.00beta6 (from /trunk:4320)
+   A /tags/v8.00.00beta7 (from /trunk:4322)
 
-Tagging as v8.00.00beta6
+Tagging as v8.00.00beta7
+------------------------------------------------------------------------
+r4322 | dynaletik | 2015-01-11 19:24:23 +0000 (Sun, 11 Jan 2015) | 1 line
+Changed paths:
+   M /trunk/AtlasLoot/Addons/BonusRoll.lua
+   M /trunk/AtlasLoot/AtlasLoot.toc
+   M /trunk/AtlasLoot/AtlasLoot.xml
+   M /trunk/AtlasLoot/Button/Button.lua
+   M /trunk/AtlasLoot/Button/Extra_Price_type.lua
+   M /trunk/AtlasLoot/Button/Extra_Quest_type.lua
+   M /trunk/AtlasLoot/Button/Item_type.lua
+   M /trunk/AtlasLoot/Button/Set_type.lua
+   M /trunk/AtlasLoot/Constants.lua
+   M /trunk/AtlasLoot/Core/ChatLink.lua
+   A /trunk/AtlasLoot/Core/MapPOI.lua
+   M /trunk/AtlasLoot/Data/Sets.lua
+   M /trunk/AtlasLoot/GUI/GUI.lua
+   M /trunk/AtlasLoot/GUI/ItemFrame.lua
+   M /trunk/AtlasLoot/GUI/QuickLootFrame.lua
+   D /trunk/AtlasLoot/GUI/Styler.lua
+   M /trunk/AtlasLoot/GUI/Template_DropDown.lua
+   M /trunk/AtlasLoot/GUI/Template_Select.lua
+   M /trunk/AtlasLoot/GUI/Template_TextWithBg.lua
+   M /trunk/AtlasLoot/ItemDB/ItemDB.lua
+   D /trunk/AtlasLoot/ItemDB/NpcData.lua
+   M /trunk/AtlasLoot/Loader.lua
+   M /trunk/AtlasLoot/Locales/IngameLocales.lua
+   M /trunk/AtlasLoot/Locales/Locales.lua
+   M /trunk/AtlasLoot/Locales/constants.lua
+   M /trunk/AtlasLoot/db.lua
+   M /trunk/AtlasLoot_BurningCrusade/data.lua
+   M /trunk/AtlasLoot_Cataclysm/data.lua
+   M /trunk/AtlasLoot_Classic/data.lua
+   M /trunk/AtlasLoot_Collections/AtlasLoot_Collections.toc
+   M /trunk/AtlasLoot_Collections/data.lua
+   A /trunk/AtlasLoot_Collections/embeds.xml
+   M /trunk/AtlasLoot_Crafting/data.lua
+   M /trunk/AtlasLoot_Factions/data.lua
+   M /trunk/AtlasLoot_Options/Core.lua
+   M /trunk/AtlasLoot_Options/Locales/constants.lua
+   M /trunk/AtlasLoot_WarlordsofDraenor/data.lua
+   M /trunk/AtlasLoot_WorldEvents/data.lua
+
+- beta 7
 ------------------------------------------------------------------------
 r4320 | dynaletik | 2014-12-28 18:54:57 +0000 (Sun, 28 Dec 2014) | 1 line
 Changed paths:

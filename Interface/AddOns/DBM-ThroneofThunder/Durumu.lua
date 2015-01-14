@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(818, "DBM-ThroneofThunder", nil, 362)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 2 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 30 $"):sub(12, -3))
 mod:SetCreatureID(68036)--Crimson Fog 69050
 mod:SetEncounterID(1572)
 mod:SetZone()
@@ -68,7 +68,6 @@ local timerDarkParasite				= mod:NewTargetTimer("OptionVersion2", 30, 133597, ni
 local timerDarkPlague				= mod:NewTargetTimer("OptionVersion2", 30, 133598, nil, false)--Spammy bar in 25 man not useful.
 local timerObliterateCD				= mod:NewNextTimer(80, 137747)--Heroic
 
-local soundLingeringGaze			= mod:NewSound(134044)
 local countdownLightSpectrum		= mod:NewCountdown(60, "ej6891")
 local countdownDisintegrationbeam	= mod:NewCountdownFades(55, "ej6882")
 
@@ -347,7 +346,6 @@ function mod:SPELL_AURA_APPLIED(args)
 		if args:IsPlayer() then
 			specWarnLingeringGaze:Show()
 			yellLingeringGaze:Yell()
-			soundLingeringGaze:Play()
 		end
 	elseif spellId == 137727 and self.Options.SetIconLifeDrain then -- Life Drain current target. If target warning needed, insert into this block. (maybe very spammy)
 		self:SetIcon(args.destName, 8)--Skull

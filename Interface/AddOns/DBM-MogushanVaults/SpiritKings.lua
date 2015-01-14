@@ -1,7 +1,7 @@
 local mod	= DBM:NewMod(687, "DBM-MogushanVaults", nil, 317)
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 2 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 30 $"):sub(12, -3))
 mod:SetCreatureID(60701, 60708, 60709, 60710)--Adds: 60731 Undying Shadow, 60958 Pinning Arrow
 mod:SetEncounterID(1436)
 mod:SetZone()
@@ -50,7 +50,7 @@ local warnActivated				= mod:NewTargetAnnounce(118212, 3, 78740)
 
 --Zian
 local specWarnUndyingShadow		= mod:NewSpecialWarningSwitch("ej5854", mod:IsDps())
-local specWarnFixate			= mod:NewSpecialWarningYou(118303)
+local specWarnFixate			= mod:NewSpecialWarningRun(118303, nil, nil, nil, 4)
 local yellFixate				= mod:NewYell(118303)
 local specWarnCoalescingShadows	= mod:NewSpecialWarningMove(117558)
 local specWarnShadowBlast		= mod:NewSpecialWarningInterrupt(117628, false)--very spammy. better to optional use
@@ -92,8 +92,6 @@ local timerSleightOfHandCD		= mod:NewCDTimer(42, 118162)
 local timerSleightOfHand		= mod:NewBuffActiveTimer(11, 118162)--2+9 (cast+duration)
 
 local berserkTimer				= mod:NewBerserkTimer(600)
-
-local soundFixate				= mod:NewSound(118303)
 
 local countdownImperviousShield	= mod:NewCountdown(42, 117961)
 local countdownShieldOfDarkness	= mod:NewCountdown(42.5, 117697)
@@ -171,7 +169,6 @@ function mod:SPELL_AURA_APPLIED(args)
 		if args:IsPlayer() then
 			specWarnFixate:Show()
 			yellFixate:Yell()
-			soundFixate:Play()
 		end
 	elseif spellId == 118135 then
 		pinnedTargets[#pinnedTargets + 1] = args.destName
