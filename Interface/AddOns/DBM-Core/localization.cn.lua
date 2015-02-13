@@ -2,7 +2,7 @@
 -- Diablohu(diablohudream@gmail.com)
 -- yleaf(yaroot@gmail.com)
 -- Mini_Dragon(projecteurs@gmail.com)
--- Last update: Dec 31, 2014@12246
+-- Last update: Jan 31, 2015@12636
 
 if GetLocale() ~= "zhCN" then return end
 
@@ -20,6 +20,7 @@ DBM_CORE_LOAD_GUI_ERROR				= "无法读取图形界面：%s"
 DBM_CORE_LOAD_GUI_COMBAT			= "DBM无法在战斗中初始化图形界面。请先在非战斗状态打开图形设置界面，之后的战斗中就可以自由打开和关闭该界面了。"
 DBM_CORE_LOAD_SKIN_COMBAT			= "DBM无法在战斗中更换皮肤。请先在非战斗状态更换好皮肤，并重载界面。"
 DBM_CORE_BAD_LOAD					= "DBM检测到由于你在战斗过程中载入模块，有些计时器可能会错误。请在离开战斗后马上重载界面。"
+DBM_CORE_LOAD_MOD_VER_MISMATCH		= "%s 模块无法被载入。 DBM核心版本过旧。请升级DBM。"
 
 DBM_CORE_BLIZZ_BUGS					= "6.0中的暴雪的插件bug:\n1. 如果你开启音效，你的插件可能会在战斗时丢失声音，因为插件的优先权被下降了而声音通道有限。DBM已经强制将声音通道数设置为64。在这种情况下还丢失报警声音，你可以考虑关闭游戏音效。"
 
@@ -58,6 +59,31 @@ DBM_CORE_COMBAT_STATE_RECOVERED		= "%s作战%s前开始，正在恢复计时条�
 DBM_CORE_TRANSCRIPTOR_LOG_START		= "Transcriptor logging started."
 DBM_CORE_TRANSCRIPTOR_LOG_END		= "Transcriptor logging ended."
 
+DBM_CORE_PROFILE_CREATED			= "配置文件 '%s' 已经创建."
+DBM_CORE_PROFILE_CREATE_ERROR		= "配置文件创建失败. 无效的配置文件名."
+DBM_CORE_PROFILE_CREATE_ERROR_D		= "配置文件创建失败. '%s' 已经存在."
+DBM_CORE_PROFILE_APPLIED			= "配置文件 '%s' 已经应用."
+DBM_CORE_PROFILE_APPLY_ERROR		= "配置文件应用失败. '%s' 并不存在."
+DBM_CORE_PROFILE_DELETED			= "配置文件 '%s' 已经删除. 'Default' 默认配置文件会被应用."
+DBM_CORE_PROFILE_COPIED				= "配置文件 '%s' 已经复制."
+DBM_CORE_PROFILE_COPY_ERROR			= "配置文件复制失败. '%s' 并不存在."
+DBM_CORE_PROFILE_COPY_ERROR_SELF	= "无法自己复制自己的配置文件."
+DBM_CORE_PROFILE_DELETE_ERROR		= "配置文件删除失败. '%s' 并不存在."
+DBM_CORE_PROFILE_CANNOT_DELETE		= "'Default' 默认配置文件无法被删除"
+DBM_CORE_MPROFILE_COPY_SUCCESS		= "%s(%d专精)的模块设置已经被复制."
+DBM_CORE_MPROFILE_COPY_SELF_ERROR	= "无法自己复制自己的配置文件"
+DBM_CORE_MPROFILE_COPY_S_ERROR		= "复制的源出错. 源配置文件可能版本过旧或被篡改."
+DBM_CORE_MPROFILE_COPYS_SUCCESS		= "%s(%d专精)的模块声音设置已经被复制."
+DBM_CORE_MPROFILE_COPYS_SELF_ERROR	= "无法自己复制自己的声音配置文件"
+DBM_CORE_MPROFILE_COPYS_S_ERROR		= "复制的源出错. 源配置文件可能版本过旧或被篡改."
+DBM_CORE_MPROFILE_DELETE_SUCCESS	= "%s(%d专精)的模块设置已经被删除."
+DBM_CORE_MPROFILE_DELETE_SELF_ERROR	= "无法删除一个正在使用的模块配置文件."
+DBM_CORE_MPROFILE_DELETE_S_ERROR	= "删除的源出错. 源配置文件可能版本过旧或被篡改."
+
+DBM_CORE_ALLMOD_DEFAULT_LOADED		= "本副本里的所有Boss配置已经被初始化"
+DBM_CORE_ALLMOD_STATS_RESETED		= "所有模组的状态已被重置"
+DBM_CORE_MOD_DEFAULT_LOADED			= "将会使用默认设置来进行本场战斗"
+
 DBM_CORE_WORLDBOSS_ENGAGED			= "世界Boss-%s可能正在作战。当前还有%s的生命值。 (由%s的DBM发送)"
 DBM_CORE_WORLDBOSS_DEFEATED			= "世界Boss-%s可能战斗结束了。 (由%s的DBM发送)"
 
@@ -68,7 +94,7 @@ DBM_CORE_TIMER_FORMAT				= "%d分%d秒"
 DBM_CORE_MIN						= "分"
 DBM_CORE_MIN_FMT					= "%d分"
 DBM_CORE_SEC						= "秒"
-DBM_CORE_SEC_FMT					= "%d秒"
+DBM_CORE_SEC_FMT					= "%s秒"
 DBM_CORE_DEAD						= "死亡"
 DBM_CORE_OK							= "确定"
 
@@ -83,6 +109,9 @@ DBM_CORE_OPTION_HEALTH_FRAME		= "首领生命值窗口"
 
 DBM_CORE_OPTION_CATEGORY_TIMERS		= "计时条"
 DBM_CORE_OPTION_CATEGORY_WARNINGS	= "警报"
+DBM_CORE_OPTION_CATEGORY_WARNINGS_YOU	= "个人警报"
+DBM_CORE_OPTION_CATEGORY_WARNINGS_OTHER	= "目标警报"
+DBM_CORE_OPTION_CATEGORY_WARNINGS_ROLE	= "角色警报"
 DBM_CORE_OPTION_CATEGORY_MISC		= "其它"
 DBM_CORE_OPTION_CATEGORY_SOUNDS		= "声音"
 
@@ -106,11 +135,12 @@ DBM_CORE_VERSIONCHECK_ENTRY			= "%s: %s (r%d) %s"--One Boss mod
 DBM_CORE_VERSIONCHECK_ENTRY_TWO		= "%s: %s (r%d) & %s (r%d)"--Two Boss mods
 DBM_CORE_VERSIONCHECK_ENTRY_NO_DBM	= "%s：未安装DBM"
 DBM_CORE_VERSIONCHECK_OUTDATED		= "下列%d名玩家的DBM版本已经过期:%s"
-DBM_CORE_VERSIONCHECK_FOOTER		= "团队中有%d名成员正在使用DBM"
+DBM_CORE_VERSIONCHECK_FOOTER		= "团队中有%d名成员正在使用DBM， %d名成员正在使用Bigwigs"
 DBM_CORE_YOUR_VERSION_OUTDATED		= "你的DBM已经过期。请访问 http://dev.deadlybossmods.com 下载最新版本。"
 DBM_CORE_OUTDATED_PVP_MODS			= "你当前使用的DBM-PVP模块已经过期。PVP模块现在需要单独下载。请访问 http://www.deadlybossmods.com"
 DBM_CORE_VOICE_PACK_OUTDATED		= "你当前使用的DBM语音包已经过期。特殊警报屏蔽（当心，毁灭）已被禁用。请下载最新语音包，或联系语音包作者更新。"
 DBM_CORE_VOICE_MISSING				= "DBM找不到你当前选择的语音包。语音包选项已经被设置成'None'。请确保你的语音包被正确安装和启用。"
+DBM_CORE_VOICE_COUNT_MISSING		= "在 %d 语音包中找不到倒计时语音。倒计时已恢复为默认值"
 --DBM_BIG_WIGS						(Same as English locales)
 --DBM_BIG_WIGS_ALPHA					(Same as English locales)
 
@@ -123,6 +153,7 @@ DBM_CORE_UPDATEREMINDER_DISABLE			= "警告：你的DBM已经过期了%d个版�
 DBM_CORE_UPDATEREMINDER_HOTFIX			= "你的DBM版本会在这首领战斗有不准确的计时器或警告。这问题会在下次正式版更新。你也可以更新至最新的alpha版本立即修正此问题。"
 DBM_CORE_UPDATEREMINDER_TESTVERSION		= "警告：你使用了不正确版本的DBM。请确保DBM版本和游戏版本一致。"
 DBM_CORE_VEM							= "你好像在使用VEM。DBM在这种情况下无法被载入。"
+DBM_CORE_3RDPROFILES					= "警告: DBM-Profiles已经无法和本版本DBM兼容。DBM核心已经自带配置文件管理系统，请移除DBM-Profiles避免冲突。"
 
 DBM_CORE_MOVABLE_BAR				= "拖动我！"
 
@@ -130,10 +161,12 @@ DBM_PIZZA_SYNC_INFO					= "|Hplayer:%1$s|h[%1$s]|h向你发送了一个DBM计时
 DBM_PIZZA_CONFIRM_IGNORE			= "是否要在该次游戏连接中屏蔽来自%s的计时条？"
 DBM_PIZZA_ERROR_USAGE				= "命令：/dbm [broadcast] timer <时间（秒）> <文本>"
 
+--DBM_CORE_MINIMAP_TOOLTIP_HEADER		= "Deadly Boss Mods"
 DBM_CORE_MINIMAP_TOOLTIP_FOOTER		= "Shift+拖动 / 右键拖动：拖动\nAlt+Shift+拖动：自由拖动"
 
 DBM_CORE_RANGECHECK_HEADER			= "距离监视（%d码）"
 DBM_CORE_RANGECHECK_SETRANGE		= "设置距离"
+DBM_CORE_RANGECHECK_SETTHRESHOLD	= "设置玩家数量阈值"
 DBM_CORE_RANGECHECK_SOUNDS			= "音效"
 DBM_CORE_RANGECHECK_SOUND_OPTION_1	= "声音提示：当有玩家接近时"
 DBM_CORE_RANGECHECK_SOUND_OPTION_2	= "声音提示：多名玩家接近时"
@@ -147,8 +180,10 @@ DBM_CORE_RANGECHECK_OPTION_FRAMES	= "框体"
 DBM_CORE_RANGECHECK_OPTION_RADAR	= "显示雷达框体"
 DBM_CORE_RANGECHECK_OPTION_TEXT		= "显示文本框体"
 DBM_CORE_RANGECHECK_OPTION_BOTH		= "同时显示雷达和文本框体"
-DBM_CORE_RANGERADAR_HEADER			= "距离雷达（%d码）"
-DBM_CORE_RANGERADAR_IN_RANGE_TEXT	= "%d人在监视距离内"
+DBM_CORE_RANGERADAR_HEADER			= "距离%d码 玩家%d人"
+DBM_CORE_RANGERADAR_IN_RANGE_TEXT	= "%d人在监视距离内（%d码）"
+DBM_CORE_RANGERADAR_IN_RANGE_TEXTONE= "%s (%0.1f码)"--One target
+
 
 DBM_CORE_INFOFRAME_SHOW_SELF		= "总是显示你的能量"		-- Always show your own power value even if you are below the threshold
 
@@ -156,32 +191,29 @@ DBM_LFG_INVITE						= "随机副本确认"
 
 DBM_CORE_SLASHCMD_HELP				= {
 	"可用命令：",
+	"/range <number> 或者 /distance <number>: 显示距离雷达窗体. 使用 /rrange 或者 /rdistance 翻转颜色.",
 	"/dbm version:进行团队范围的DBM版本检测（也可使用：ver）",
---	"/dbm version2: 进行团队范围的DBM版本检测并密语给那些使用过期版本的玩家（也可使用：ver2）",
 	"/dbm unlock:显示一个可移动的计时条，可通过对它来移动所有DBM计时条的位置（也可使用：move）",
-	"/dbm timer/ctimer/ltimer/cltimer <x> <text>: 启动一个 <x> 秒的计时器。文本内容为 <text>. 去 http://tinyurl.com/kwsfl59 查阅每种函数用法",
-	"/dbm broadcast timer <x> <文本>:向团队广播一个以<文本>为名称的时间为<x>秒的倒计时（需要团队领袖或助理权限）",
+	"/dbm timer/ctimer/ltimer/cltimer <x> <text>: 启动一个 <x> 秒的计时器。文本内容为 <text>.",
+	"/dbm broadcast timer <x> <文本>:向团队广播一个以<文本>为名称的时间为<x>秒的倒计时(需要队长或助理权限)。",
 	"/dbm timer endloop: 停止所有的 ltimer 和 cltimer.",
-	"/dbm break <分钟>: 开始一个<分钟>时间的休息计时条。并向所有团队成员发送这个DBM休息计时条（需开启团队广播及助理权限）。",
-	"/dbm pull <秒>: 开始一个<秒>时间的开怪计时条。 并向所有团队成员发送这个DBM开怪计时条（需开启团队广播及助理权限）。",
+	"/dbm break <分钟>: 开始一个<分钟>时间的休息计时条。并向所有团队成员发送这个DBM休息计时条(需要队长或助理权限)。",
+	"/dbm pull <秒>: 开始一个<秒>时间的开怪计时条。 并向所有团队成员发送这个DBM开怪计时条(需要队长或助理权限)。",
 	"/dbm arrow: 显示DBM箭头，输入/dbm arrow查询 更多信息。",
-	"/dbm lockout: 查询团队成员当前的副本锁定状态（也可使用：lockouts, ids）（需要团队领袖或助理权限）。",
-	"/dbm lag: 检测全团延时。",
-	"/dbm help: 显示可用命令的说明， 也就是你现在看到的东西。"
+	"/dbm lockout: 查询团队成员当前的副本锁定状态(副本CD)(也可使用：lockouts, ids)(需要队长或助理权限)。",
+	"/dbm lag: 检测全团网络延时。"
 }
 
-DBM_ERROR_NO_PERMISSION				= "你无权进行该操作。"
+DBM_ERROR_NO_PERMISSION				= "你无权进行该操作。(需要队长或助理权限?)"
 
 DBM_CORE_BOSSHEALTH_HIDE_FRAME		= "隐藏生命值框体"
-
-DBM_CORE_ALLIANCE					= "联盟"
-DBM_CORE_HORDE						= "部落"
 
 DBM_CORE_UNKNOWN					= "未知"
 DBM_CORE_LEFT						= "左"
 DBM_CORE_RIGHT						= "右"
 DBM_CORE_BACK						= "后"
 DBM_CORE_FRONT						= "前"
+DBM_CORE_INTERMISSION				= "中场时间"
 
 DBM_CORE_BREAK_START				= "开始休息 - %s分钟！（由 %s 发送）"
 DBM_CORE_BREAK_MIN					= "%s分钟后休息结束！"
@@ -192,6 +224,7 @@ DBM_CORE_ANNOUNCE_BREAK_OVER		= "休息已结束"
 DBM_CORE_TIMER_PULL					= "开怪倒计时"
 DBM_CORE_ANNOUNCE_PULL				= "%d秒后开怪 （由 %s 发送）"
 DBM_CORE_ANNOUNCE_PULL_NOW			= "开怪！"
+DBM_CORE_GEAR_WARNING				= "警告：请检查你的装备. 你当前的装备装等比背包装等低了 %d 点。"
 
 DBM_CORE_ACHIEVEMENT_TIMER_SPEED_KILL = "成就：限时击杀"
 
@@ -222,6 +255,7 @@ DBM_CORE_AUTO_ANNOUNCE_OPTIONS.cast				= "警报：$spell:%s的施放"
 DBM_CORE_AUTO_ANNOUNCE_OPTIONS.soon				= prewarnOption
 DBM_CORE_AUTO_ANNOUNCE_OPTIONS.prewarn			= prewarnOption
 DBM_CORE_AUTO_ANNOUNCE_OPTIONS.phase			= "警报：第%s阶段"
+DBM_CORE_AUTO_ANNOUNCE_OPTIONS.phasechange		= "警报：阶段转换"
 DBM_CORE_AUTO_ANNOUNCE_OPTIONS.prephase			= "预警：第%s阶段"
 DBM_CORE_AUTO_ANNOUNCE_OPTIONS.count			= "警报：$spell:%s"
 DBM_CORE_AUTO_ANNOUNCE_OPTIONS.stack			= "警报：$spell:%s叠加层数"
@@ -233,11 +267,13 @@ DBM_CORE_AUTO_SPEC_WARN_TEXTS.soon				= "%s 即将到来"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.prewarn			= "%s 于 %s"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.dispel			= ">%%s<中了%s - 快驱散"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.interrupt			= "%s - 快打断"
+DBM_CORE_AUTO_SPEC_WARN_TEXTS.interruptcount	= "%s - 快打断 (%%d)"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.you				= "你中了%s"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.target			= ">%%s<中了%s"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.taunt				= ">%%s<中了%s - 快嘲讽"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.close				= "你附近的>%%s<中了%s"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.move				= "%s - 快躲开"
+DBM_CORE_AUTO_SPEC_WARN_TEXTS.dodge				= "%s - 躲开攻击"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.moveaway			= "%s - 离开人群"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.moveto			= "%s - 靠近 >%%s<"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.run				= "%s - 快跑"
@@ -246,6 +282,7 @@ DBM_CORE_AUTO_SPEC_WARN_TEXTS.reflect			= ">%%s<中了%s - 快停手"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.count				= "%s! (%%d)"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.stack				= "你叠加了%%d层%s"
 DBM_CORE_AUTO_SPEC_WARN_TEXTS.switch			= ">%s< - 转换目标"
+DBM_CORE_AUTO_SPEC_WARN_TEXTS.switchcount		= ">%s< - 转换目标 (%%d)"
 
 -- Auto-generated Special Warning Localizations
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.spell			= "特殊警报：$spell:%s"
@@ -260,6 +297,7 @@ DBM_CORE_AUTO_SPEC_WARN_OPTIONS.target			= "特殊警报：当他人受到$spell
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.taunt 			= "特殊警报：当另外一个T中了$spell:%s并需要你嘲讽时"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.close			= "特殊警报：当你附近有人受到$spell:%s影响时"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.move			= "特殊警报：当你受到$spell:%s影响时"
+DBM_CORE_AUTO_SPEC_WARN_OPTIONS.dodge			= "特殊警报：当你受到$spell:%s影响并需要躲开攻击"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.moveaway		= "特殊警报：当你受到$spell:%s影响并需要跑开人群时"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.moveto			= "特殊警报：当他人中了$spell:%s并需要你去靠近时"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.run				= "特殊警报：$spell:%s"
@@ -267,6 +305,8 @@ DBM_CORE_AUTO_SPEC_WARN_OPTIONS.cast			= "特殊警报：$spell:%s的施放（�
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.count 			= "特殊警报：$spell:%s"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.stack			= "特殊警报：当叠加了>=%d层$spell:%s时"
 DBM_CORE_AUTO_SPEC_WARN_OPTIONS.switch 			= "特殊警报：针对$spell:%s需要转换目标"
+DBM_CORE_AUTO_SPEC_WARN_OPTIONS.switchcount		= DBM_CORE_AUTO_SPEC_WARN_OPTIONS.switch
+DBM_CORE_AUTO_SPEC_WARN_OPTIONS.interruptcount	= DBM_CORE_AUTO_SPEC_WARN_OPTIONS.interrupt
 
 -- Auto-generated Timer Localizations
 DBM_CORE_AUTO_TIMER_TEXTS.target				= "%s: >%%s<"
@@ -291,13 +331,14 @@ DBM_CORE_AUTO_TIMER_OPTIONS.fades				= "计时条：$spell:%s何时从玩家身�
 DBM_CORE_AUTO_TIMER_OPTIONS.cd					= "计时条：$spell:%s冷却时间"
 DBM_CORE_AUTO_TIMER_OPTIONS.cdcount				= "计时条：$spell:%s冷却时间"
 DBM_CORE_AUTO_TIMER_OPTIONS.cdsource			= "计时条：$spell:%s冷却时间以及来源"
-DBM_CORE_AUTO_TIMER_OPTIONS.cdspecial				= "计时条：特殊技能冷却"
+DBM_CORE_AUTO_TIMER_OPTIONS.cdspecial			= "计时条：特殊技能冷却"
 DBM_CORE_AUTO_TIMER_OPTIONS.next				= "计时条：下一次$spell:%s"
 DBM_CORE_AUTO_TIMER_OPTIONS.nextcount			= "计时条：下一次$spell:%s"
 DBM_CORE_AUTO_TIMER_OPTIONS.nextsource			= "计时条：下一次$spell:%s以及来源"
 DBM_CORE_AUTO_TIMER_OPTIONS.nextspecial			= "计时条：下一次特殊技能"
 DBM_CORE_AUTO_TIMER_OPTIONS.achievement			= "计时条：成就%s"
-DBM_CORE_AUTO_TIMER_OPTIONS.phase					= "计时条：下一阶段"
+DBM_CORE_AUTO_TIMER_OPTIONS.phase				= "计时条：下一阶段"
+DBM_CORE_AUTO_TIMER_OPTIONS.roleplay			= "计时条：剧情"
 
 DBM_CORE_AUTO_ICONS_OPTION_TEXT				= "为$spell:%s的目标添加团队标记"
 DBM_CORE_AUTO_ICONS_OPTION_TEXT2			= "为$spell:%s添加团队标记"
@@ -310,12 +351,14 @@ DBM_CORE_AUTO_VOICE2_OPTION_TEXT			= "为阶段转换提供语音包警报"
 DBM_CORE_AUTO_COUNTDOWN_OPTION_TEXT			= "倒计时：$spell:%s的冷却时间倒计时"
 DBM_CORE_AUTO_COUNTDOWN_OPTION_TEXT2		= "倒计时：$spell:%s消失时"
 DBM_CORE_AUTO_COUNTOUT_OPTION_TEXT			= "倒计时：$spell:%s的持续时间正计时"
-DBM_CORE_AUTO_YELL_OPTION_TEXT				= "当你受到$spell:%s影响时时大喊"
+DBM_CORE_AUTO_YELL_OPTION_TEXT				= "当你受到$spell:%s影响时大喊"
 DBM_CORE_AUTO_YELL_ANNOUNCE_TEXT			= UnitName("player") .. " 中了 %s!"
-DBM_CORE_AUTO_RANGE_OPTION_TEXT				= "距离监视(%s)：$spell:%s"--string used for range so we can use things like "5/2" as a value for that field
-DBM_CORE_AUTO_RANGE_OPTION_TEXT_SHORT		= "距离监视(%s)"--For when a range frame is just used for more than one thing
+DBM_CORE_AUTO_RANGE_OPTION_TEXT				= "距离监视(%s码)：$spell:%s"--string used for range so we can use things like "5/2" as a value for that field
+DBM_CORE_AUTO_RANGE_OPTION_TEXT_SHORT		= "距离监视(%s码)"--For when a range frame is just used for more than one thing
+DBM_CORE_AUTO_RRANGE_OPTION_TEXT			= "反转距离监视(%s码)：$spell:%s"--Reverse range frame (green when players in range, red when not)
+DBM_CORE_AUTO_RRANGE_OPTION_TEXT_SHORT		= "反转距离监视(%s码)"
 DBM_CORE_AUTO_INFO_FRAME_OPTION_TEXT		= "信息框：$spell:%s"
-DBM_CORE_AUTO_READY_CHECK_OPTION_TEXT		= "当首领开打时拨放准备检查的音效（即使没有选定目标）"
+DBM_CORE_AUTO_READY_CHECK_OPTION_TEXT		= "当首领开打时播放准备检查的音效（即使没有选定目标）"
 
 -- New special warnings
 DBM_CORE_MOVE_SPECIAL_WARNING_BAR		= "可拖动的特别警报"

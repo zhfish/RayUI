@@ -16,9 +16,9 @@ elseif GetLocale() == "zhTW" then
 	L.AbilityCountFormat = "%s(%d/%d)"
 	L.AbilityPair = "此組合: 任用%d  總計%d"
 elseif GetLocale() == "koKR" then
-	L.UnPressed = "쉬프트키를 눌러 다른 능력들 보기...|nPress ALT to show ability pairs..."
+	L.UnPressed = "쉬프트키를 눌러 다른 능력들 보기...|n알트키를 눌러 능력 조합 보기..."
 	L.ShiftDown = "다른 능력들"
-	L.AltDown = "Ability Pairs"
+	L.AltDown = "능력 조합"
 	L.AbilityCountFormat = "%s(%d/%d)"
 	L.AbilityPair = "이 조합: 활성 %d 전체 %d"
 else --enUS

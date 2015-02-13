@@ -700,8 +700,11 @@ function Garrison:GetMissionCount(paramCharInfo)
 		
 		for realmName, realmData in pairs(globalDb.data) do
 			for playerName, playerData in pairs(realmData) do
-				if not Garrison.isCurrentChar(playerData.info) then
-					Garrison:GetPlayerMissionCount(playerData.info, missionCount, playerData.missions)
+				-- don't count/show disabled characters
+				if playerData.tooltipEnabled == nil or playerData.tooltipEnabled then
+					if not Garrison.isCurrentChar(playerData.info) then
+						Garrison:GetPlayerMissionCount(playerData.info, missionCount, playerData.missions)
+					end
 				end
 			end
 		end
@@ -741,8 +744,11 @@ function Garrison:GetBuildingCount(paramCharInfo)
 
 		for realmName, realmData in pairs(globalDb.data) do
 			for playerName, playerData in pairs(realmData) do
-				if not Garrison.isCurrentChar(playerData.info) then
-					Garrison:GetPlayerBuildingCount(playerData.info, buildingCount, playerData.buildings)
+				-- don't count/show disabled characters
+				if playerData.tooltipEnabled == nil or playerData.tooltipEnabled then
+					if not Garrison.isCurrentChar(playerData.info) then
+						Garrison:GetPlayerBuildingCount(playerData.info, buildingCount, playerData.buildings)
+					end
 				end
 			end
 		end
@@ -1188,23 +1194,23 @@ do
 						--local buildingCount = Garrison:GetBuildingCount(playerData.info)
 						local buildingCount = buildingCountTable[playerName]
 
-						if playerData.tooltipEnabled == nil or playerData.tooltipEnabled and (buildingCount.building.total > 0) then
+						local estimatedCacheResourceAmount = ""
+						local cacheWarning = false
+						local tmpResources = Garrison.getResourceFromTimestamp(playerData.garrisonCacheLastLooted, now)
+						if tmpResources ~= nil and tmpResources >= 5 then
+							local resourceColor = colors.lightGray
+							if tmpResources >= 400 then
+								resourceColor = colors.red
+								cacheWarning = true
+							end
+							estimatedCacheResourceAmount = getColoredString((" (%s)"):format(math.min(500, tmpResources)), resourceColor)								
+						end
+
+						if playerData.tooltipEnabled == nil or playerData.tooltipEnabled and (buildingCount.building.total > 0 or cacheWarning) then
 							playerCount = playerCount + 1 
 
 							AddEmptyRow(tooltip)
 							row = AddRow(tooltip)
-
-							local estimatedCacheResourceAmount = ""
-
-							local tmpResources = Garrison.getResourceFromTimestamp(playerData.garrisonCacheLastLooted, now)
-							if tmpResources ~= nil and tmpResources >= 5 then
-								local resourceColor = colors.lightGray
-
-								if tmpResources >= 400 then
-									resourceColor = colors.red
-								end
-								estimatedCacheResourceAmount = getColoredString((" (%s)"):format(math.min(500, tmpResources)), resourceColor)
-							end
 
 							local invasionAvailable = ""
 
@@ -1213,7 +1219,7 @@ do
 							end
 
 							tooltip:SetCell(row, 1, playerData.buildingsExpanded and Garrison.ICON_CLOSE or Garrison.ICON_OPEN, nil, "LEFT", 1, nil, 0, 0, 20, 20)
-							tooltip:SetCell(row, 2, ("%s %s"):format(getColoredUnitName(playerData.info.playerName, playerData.info.playerClass, realmName), invasionAvailable), nil, "LEFT", 3)
+							tooltip:SetCell(row, 2, ("%s %s %s"):format(getColoredUnitName(playerData.info.playerName, playerData.info.playerClass, realmName), invasionAvailable, cacheWarning and Garrison.ICON_WARNING or ""), nil, "LEFT", 3)
 							tooltip:SetCell(row, 5, ("%s %s %s %s%s %s %s"):format(Garrison.ICON_CURRENCY_TEMPERED_FATE_TOOLTIP, BreakUpLargeNumbers(playerData.currencySealOfTemperedFateAmount or 0), 
 								Garrison.ICON_CURRENCY_TOOLTIP, BreakUpLargeNumbers(playerData.currencyAmount or 0), estimatedCacheResourceAmount, 
 								Garrison.ICON_CURRENCY_APEXIS_TOOLTIP, BreakUpLargeNumbers(playerData.currencyApexisAmount or 0)), 
@@ -1230,7 +1236,7 @@ do
 							if not (playerData.buildingsExpanded) then
 								
 
-								local playerBuildingUpgrade = ("%s %s"):format(getColoredUnitName(playerData.info.playerName, playerData.info.playerClass, realmName), invasionAvailable)
+								local playerBuildingUpgrade = ("%s %s %s"):format(getColoredUnitName(playerData.info.playerName, playerData.info.playerClass, realmName), invasionAvailable, cacheWarning and Garrison.ICON_WARNING or "")
 
 								local formattedShipment = ""
 
@@ -1276,8 +1282,36 @@ do
 								--local sortedBuildingTable = Garrison.sort(playerData.buildings, "name,a")
 
 								for plotID, buildingData in sortedBuildingTable do
+									
+									local timeLeftBuilding = 0
+									if buildingData.isBuilding then
+										timeLeftBuilding = buildingData.buildTime - (now - buildingData.timeStart)
+									end
+
+									local rank, buildingInfoIcon = "", ""
+									if buildingData.isBuilding or buildingData.canActivate then									
+
+										if (buildingData.isBuilding and timeLeftBuilding > 0) then
+											buildingInfoIcon = Garrison.ICON_ARROW_UP_WAITING
+										else
+											buildingInfoIcon = Garrison.ICON_ARROW_UP
+										end
+
+											--debugPrint(("[%s] isBuilding: %s, timeLeftBuilding: %s"):format(buildingData.name, _G.tostring(buildingData.isBuilding), _G.tostring(timeLeftBuilding)))
+
+										if buildingData.rank > 1 then
+											rank = getColoredString("("..(buildingData.rank - 1)..")", colors.lightGray)
+										else
+											rank = ""
+										end
+									else
+										rank = getColoredString("("..buildingData.rank..")", colors.lightGray)
+									end
+
+									buildingInfoIcon = buildingInfoIcon..Garrison:GetLootInfoForBuilding(playerData, buildingData)
 
 									if not configDb.general.building.hideBuildingWithoutShipments or 
+										(buildingInfoIcon ~= "") or
 										(buildingData.isBuilding or buildingData.canActivate) or
 										(buildingData.shipment and buildingData.shipment.shipmentCapacity ~= nil and buildingData.shipment.shipmentCapacity > 0) then 							
 
@@ -1313,33 +1347,7 @@ do
 										
 										-- Display building and Workorder data								
 										row = AddRow(tooltip, colors.darkGray)
-
-										local timeLeftBuilding = 0
-										if buildingData.isBuilding then
-											timeLeftBuilding = buildingData.buildTime - (now - buildingData.timeStart)
-										end
-
-										local rank, buildingInfoIcon = "", ""
-										if buildingData.isBuilding or buildingData.canActivate then									
-
-											if (buildingData.isBuilding and timeLeftBuilding > 0) then
-												buildingInfoIcon = Garrison.ICON_ARROW_UP_WAITING
-											else
-												buildingInfoIcon = Garrison.ICON_ARROW_UP
-											end
-
-											--debugPrint(("[%s] isBuilding: %s, timeLeftBuilding: %s"):format(buildingData.name, _G.tostring(buildingData.isBuilding), _G.tostring(timeLeftBuilding)))
-
-											if buildingData.rank > 1 then
-												rank = getColoredString("("..(buildingData.rank - 1)..")", colors.lightGray)
-											else
-												rank = ""
-											end
-										else
-											rank = getColoredString("("..buildingData.rank..")", colors.lightGray)
-										end
-
-										buildingInfoIcon = buildingInfoIcon..Garrison:GetLootInfoForBuilding(playerData, buildingData)
+										
 
 										if configDb.display.showIcon then
 											--tooltip:SetCell(row, 1, getIconString(, configDb.display.iconSize, false, false), nil, "LEFT", 1)
@@ -1670,33 +1678,37 @@ function Garrison:UpdateLDB()
 
 	for realmName, realmData in pairs(globalDb.data) do
 		for playerName, playerData in pairs(realmData) do
-			local tmpResourceCacheAmount = Garrison.getResourceFromTimestamp(playerData.garrisonCacheLastLooted, now)
+			-- don't count/show disabled characters
+			if playerData.tooltipEnabled == nil or playerData.tooltipEnabled then
 
-			if Garrison.isCurrentChar(playerData.info) then
-				currencyAmount = (playerData.currencyAmount or 0)
-				currencyApexisAmount = playerData.currencyApexisAmount or 0
-				currencySealOfTemperedFateAmount = playerData.currencySealOfTemperedFateAmount or 0
-				
-				resourceCacheAmount = tmpResourceCacheAmount or 0
+				local tmpResourceCacheAmount = Garrison.getResourceFromTimestamp(playerData.garrisonCacheLastLooted, now)
 
+				if Garrison.isCurrentChar(playerData.info) then
+					currencyAmount = (playerData.currencyAmount or 0)
+					currencyApexisAmount = playerData.currencyApexisAmount or 0
+					currencySealOfTemperedFateAmount = playerData.currencySealOfTemperedFateAmount or 0
+					
+					resourceCacheAmount = tmpResourceCacheAmount or 0
+
+					if playerData.invasion and playerData.invasion.available then
+						--debugPrint("invasionAvailableCurrent!!!!!")
+						invasionAvailableCurrent = true
+					end
+				end
+				currencyTotal = currencyTotal + (playerData.currencyAmount or 0)
+				currencyApexisTotal = currencyApexisTotal + (playerData.currencyApexisAmount or 0)			
 				if playerData.invasion and playerData.invasion.available then
-					--debugPrint("invasionAvailableCurrent!!!!!")
-					invasionAvailableCurrent = true
-				end
-			end
-			currencyTotal = currencyTotal + (playerData.currencyAmount or 0)
-			currencyApexisTotal = currencyApexisTotal + (playerData.currencyApexisAmount or 0)			
-			if playerData.invasion and playerData.invasion.available then
-				invasionAvailable = true
-			end			
+					invasionAvailable = true
+				end			
 
-			if tmpResourceCacheAmount then
-				if tmpResourceCacheAmount > resourceCacheAmountMax then
-					resourceCacheAmountMax = tmpResourceCacheAmount
-					resourceCacheAmountMaxChar = playerData.info
-				end
-				--resourceCacheAmountMax = math.max(resourceCacheAmountMax, tmpResourceCacheAmount)
+				if tmpResourceCacheAmount then
+					if tmpResourceCacheAmount > resourceCacheAmountMax then
+						resourceCacheAmountMax = tmpResourceCacheAmount
+						resourceCacheAmountMaxChar = playerData.info
+					end
+					--resourceCacheAmountMax = math.max(resourceCacheAmountMax, tmpResourceCacheAmount)
 
+				end
 			end
 		end
 	end

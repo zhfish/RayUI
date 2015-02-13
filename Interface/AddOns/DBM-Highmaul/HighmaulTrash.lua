@@ -1,14 +1,14 @@
 local mod	= DBM:NewMod("HighmaulTrash", "DBM-Highmaul")
 local L		= mod:GetLocalizedStrings()
 
-mod:SetRevision(("$Revision: 12295 $"):sub(12, -3))
+mod:SetRevision(("$Revision: 12576 $"):sub(12, -3))
 --mod:SetModelID(47785)
 mod:SetZone()
 
 mod.isTrashMod = true
 
 mod:RegisterEvents(
-	"SPELL_AURA_APPLIED 175636 173827 172066 166200"
+	"SPELL_AURA_APPLIED 175636 173827 172066 166200 175654"
 )
 
 --Maybe add auto range finder for moveaway warnings, and REMOVED event to close it after
@@ -16,6 +16,7 @@ local warnRuneofDestruction			= mod:NewTargetAnnounce("OptionVersion2", 175636, 
 local warnRadiatingPoison			= mod:NewTargetAnnounce("OptionVersion2", 172066, 3, nil, false)
 local warnArcaneVol					= mod:NewTargetAnnounce("OptionVersion2", 166200, 3, nil, false)
 
+local specWarnRuneofDisintegration	= mod:NewSpecialWarningMove(175654)
 local specWarnRuneofDestruction		= mod:NewSpecialWarningMoveAway(175636)
 local yellRuneofDestruction			= mod:NewYell(175636)
 local specWarnRadiatingPoison		= mod:NewSpecialWarningMoveAway(172066)
@@ -50,11 +51,13 @@ function mod:SPELL_AURA_APPLIED(args)
 		warnArcaneVol:CombinedShow(1, args.destName)
 		if args:IsPlayer() then
 			specWarnArcaneVol:Show()
-			if not self:IsLFR() then
+			if not self:IsLFR() and self:AntiSpam(3, 1) then
 				yellArcaneVol:Yell()
 			end
 		end
 	elseif spellId == 173827 and args:IsPlayer() then
 		specWarnWildFlames:Show()
+	elseif spellId == 175654 and args:IsPlayer() then
+		specWarnRuneofDisintegration:Show()
 	end
 end

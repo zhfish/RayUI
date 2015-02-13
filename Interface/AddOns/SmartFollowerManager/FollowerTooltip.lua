@@ -19,7 +19,7 @@ local function UpdateFollowerTooltips()
 	if FloatingGarrisonFollowerTooltip:IsShown() then
 		GarrisonFollowerTooltipTemplate_SetGarrisonFollower(FloatingGarrisonFollowerTooltip, FGFTData)
 	end
-	if GarrisonFollowerTooltip:IsShown() then
+	if GarrisonFollowerTooltip:IsShown() and (GFTData.noAbilityDescriptions ~= true) then
 		GarrisonFollowerTooltipTemplate_SetGarrisonFollower(GarrisonFollowerTooltip, GFTData);
 	end
 end
@@ -148,7 +148,7 @@ local function UpdateAbilitiesData(self, elapsed)
 			
 			-- Update GarrisonFollowerTooltip because it may change
 			gid = follower.garrFollowerID
-			if GarrisonFollowerTooltip:IsShown() and GFTData.garrisonFollowerID == gid then
+			if GarrisonFollowerTooltip:IsShown() and GFTData.garrisonFollowerID == gid and (GFTData.noAbilityDescriptions ~= true) then
 				updateData = {gid, follower.isCollected, follower.quality, follower.level, follower.xp, follower.levelXP, follower.iLevel, C_Garrison.GetFollowerAbilityAtIndex(id, 1), C_Garrison.GetFollowerAbilityAtIndex(id, 2), C_Garrison.GetFollowerAbilityAtIndex(id, 3), C_Garrison.GetFollowerAbilityAtIndex(id, 4), C_Garrison.GetFollowerTraitAtIndex(id, 1), C_Garrison.GetFollowerTraitAtIndex(id, 2), C_Garrison.GetFollowerTraitAtIndex(id, 3), C_Garrison.GetFollowerTraitAtIndex(id, 4), GFTData.noAbilityDescriptions}
 			end
 		end
@@ -157,6 +157,7 @@ local function UpdateAbilitiesData(self, elapsed)
 		GarrisonFollowerTooltip_Show(unpack(updateData))
 		wipe(updateData)
 	end
+	collectgarbage("collect")
 end
 local function ModifyAbilityDetailsText(fontString, ab)
 	local cid, cname = GetFollowerAbilityCounterMechanicInfo(ab)
@@ -281,9 +282,9 @@ local function ModifyFollowerTooltip(tooltipFrame, data)
 	
 	if bShowCurrentPairInfo then
 		labelPair:SetPoint("TOPLEFT", tooltipFrame.Abilities[2], "BOTTOMLEFT", labelPairXOffset, -abilityOffset);
+		SetAbilityPairText(labelPair, abilities[1], abilities[2])
 		tooltipFrameHeight = tooltipFrameHeight + labelPair:GetHeight() + abilityOffset
 		labelPair:Show()
-		SetAbilityPairText(labelPair, abilities[1], abilities[2])
 		
 		tooltipFrame.TraitsLabel:SetPoint("TOPLEFT", labelPair, "BOTTOMLEFT", -labelPairXOffset, -abilityOffset);
 	else
@@ -417,8 +418,24 @@ local function ModifyFollowerTooltip(tooltipFrame, data)
 					if not RetrainingPair then
 						RetrainingPair = CreateFrame("Frame", nil, tooltipFrame)
 						RetrainingPair:SetSize(20, 20)
-						RetrainingPair.CounterIcon1 = CreateFrame("Button", nil, RetrainingPair, "GarrisonAbilityCounterTemplate")
-						RetrainingPair.CounterIcon2 = CreateFrame("Button", nil, RetrainingPair, "GarrisonAbilityCounterTemplate")
+						--RetrainingPair.CounterIcon1 = CreateFrame("Button", nil, RetrainingPair, "GarrisonAbilityCounterTemplate")
+						--RetrainingPair.CounterIcon2 = CreateFrame("Button", nil, RetrainingPair, "GarrisonAbilityCounterTemplate")
+						RetrainingPair.CounterIcon1 = RetrainingPair:CreateTexture()
+						RetrainingPair.CounterIcon1:SetSize(20, 20)
+						RetrainingPair.CounterIcon1:SetDrawLayer("ARTWORK", -1)
+						RetrainingPair.CounterIcon1Border = RetrainingPair:CreateTexture()
+						RetrainingPair.CounterIcon1Border:SetAtlas("GarrMission_EncounterAbilityBorder")
+						RetrainingPair.CounterIcon1Border:SetPoint("CENTER", RetrainingPair.CounterIcon1, "CENTER")
+						RetrainingPair.CounterIcon1Border:SetSize(30, 30)
+						
+						RetrainingPair.CounterIcon2 = RetrainingPair:CreateTexture()
+						RetrainingPair.CounterIcon2:SetSize(20, 20)
+						RetrainingPair.CounterIcon2:SetDrawLayer("ARTWORK", -1)
+						RetrainingPair.CounterIcon2Border = RetrainingPair:CreateTexture()
+						RetrainingPair.CounterIcon2Border:SetAtlas("GarrMission_EncounterAbilityBorder")
+						RetrainingPair.CounterIcon2Border:SetPoint("CENTER", RetrainingPair.CounterIcon2, "CENTER")
+						RetrainingPair.CounterIcon2Border:SetSize(30, 30)
+						
 						RetrainingPair.Text = RetrainingPair:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 						tooltipFrame.EpicRetrainingPairs[idRP] = RetrainingPair
 					end
@@ -435,12 +452,10 @@ local function ModifyFollowerTooltip(tooltipFrame, data)
 					idC2, _, iconC2 = GetFollowerAbilityCounterMechanicInfo(abiSpec[j]);
 					
 					RetrainingPair.CounterIcon1:SetPoint("TOPLEFT");
-					RetrainingPair.CounterIcon1.Icon:SetTexture(iconC1);
-					RetrainingPair.CounterIcon1.Icon:SetMask("Interface\\CharacterFrame\\TempPortraitAlphaMask");
+					RetrainingPair.CounterIcon1:SetTexture(iconC1);
 					
 					RetrainingPair.CounterIcon2:SetPoint("TOPLEFT", RetrainingPair.CounterIcon1, "TOPRIGHT", 5, 0)
-					RetrainingPair.CounterIcon2.Icon:SetTexture(iconC2);
-					RetrainingPair.CounterIcon2.Icon:SetMask("Interface\\CharacterFrame\\TempPortraitAlphaMask");
+					RetrainingPair.CounterIcon2:SetTexture(iconC2);
 					
 					idPair = GetAbilityPairIndex(idC1, idC2)
 					nActive, _, nTotal = GetAbilityPairNum(idC1, idC2)
